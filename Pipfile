@@ -12,6 +12,7 @@ sqlparse = "==0.4.2"
 tzdata = "==2021.5"
 Django = "==4.0.1"
 django-heroku = "*"
+gunicorn = "*"
 
 [dev-packages]
 
