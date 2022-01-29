@@ -1,1 +1,1 @@
-web: gunicorn FindARoomate.wsgi --log-file -
+"web: gunicorn FindARoomate.wsgi --log-file -"
