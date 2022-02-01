@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+
 import django_heroku
+import dj_database_url
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -76,11 +78,27 @@ WSGI_APPLICATION = 'FindARoomate.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+
+        'NAME': os.environ.get("DB_NAME"),
+
+        'USER': os.environ.get("DB_USER"),
+
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+
+        'HOST': os.environ.get("DB_HOST"),
+
+        'PORT': os.environ.get("DB_PORT"),
     }
+
 }
+
+
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 
 
 # Password validation

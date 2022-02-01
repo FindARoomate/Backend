@@ -13,6 +13,7 @@ tzdata = "==2021.5"
 Django = "==4.0.1"
 django-heroku = "*"
 gunicorn = "*"
+dj-database-url = "*"
 
 [dev-packages]
 
