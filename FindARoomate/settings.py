@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'authentify',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'FindARoomate.wsgi.application'
+
+
+AUTH_USER_MODEL = 'authentify.CustomUser'
 
 
 # Database
