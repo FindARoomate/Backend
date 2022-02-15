@@ -7,10 +7,13 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
+from .views import JoinWaitlist
+
 app_name = "authentify"
 
 urlpatterns = [
-    path("register/", UserViewSet.as_view({"post": "create"}), name="register"),
+    path("register/",
+         UserViewSet.as_view({"post": "create"}), name="register"),
     path("login/", TokenObtainPairView.as_view(), name="login"),
     path("refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("verify/", TokenVerifyView.as_view(), name="verify"),
@@ -34,4 +37,5 @@ urlpatterns = [
         UserViewSet.as_view({"post": "reset_password_confirm"}),
         name="reset_password_confirm",
     ),
+    path("join-waitlist/", JoinWaitlist.as_view(), name="join_waitlist"),
 ]

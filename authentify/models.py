@@ -38,3 +38,15 @@ class BaseClass(models.Model):
 
     class Meta:
         abstract = True
+
+
+class Waitlist(models.Model):
+    """
+    The waitlist model to add users that filled the waitlist form
+    """
+    email = models.EmailField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.email
