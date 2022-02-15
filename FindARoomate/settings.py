@@ -41,7 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentify',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+
+    'authentify.apps.AuthentifyConfig',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +58,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_USE_JWT = True
 
 ROOT_URLCONF = 'FindARoomate.urls'
 
@@ -123,7 +130,28 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+}
+
+DJOSER = {
+    'SEND_ACTIVATION_EMAIL': True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    'ACTIVATION_URL': 'auth/activation/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password-confirm/{uid}/{token}',
+    "SERIALIZERS": {},
+    "EMAIL": {
+        "activation": "djoser.email.ActivationEmail",
+    },
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -146,4 +174,3 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 django_heroku.settings(locals())
-
