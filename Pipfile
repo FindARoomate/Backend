@@ -16,6 +16,7 @@ gunicorn = "*"
 dj-database-url = "*"
 djoser = "*"
 djangorestframework-simplejwt = "*"
+django-allauth = "*"
 
 [dev-packages]
 
