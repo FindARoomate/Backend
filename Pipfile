@@ -17,6 +17,7 @@ dj-database-url = "*"
 djoser = "*"
 djangorestframework-simplejwt = "*"
 django-allauth = "*"
+rest-social-auth = "*"
 
 [dev-packages]
 
