@@ -16,6 +16,7 @@ gunicorn = "*"
 dj-database-url = "*"
 djoser = "*"
 djangorestframework-simplejwt = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 

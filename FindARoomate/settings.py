@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'corsheaders',
 
     'authentify.apps.AuthentifyConfig',
 ]
@@ -57,6 +58,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 REST_USE_JWT = True
@@ -83,6 +86,8 @@ WSGI_APPLICATION = 'FindARoomate.wsgi.application'
 
 
 AUTH_USER_MODEL = 'authentify.CustomUser'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Database
