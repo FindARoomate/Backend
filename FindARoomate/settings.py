@@ -159,9 +159,9 @@ DJOSER = {
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_PORT = os.environ.get("EMAIL_PORT")
+EMAIL_HOST_USER = "abdulwasiuubaydah@gmail.com"
+EMAIL_HOST_PASSWORD = "nuwbrmxegidhyggt"
+EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 
 DEFAULT_FROM_EMAIL = "abdulwasiuubaydah@gmail.com"
