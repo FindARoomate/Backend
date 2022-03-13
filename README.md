@@ -6,7 +6,6 @@ This is the back end repository of the FindARoomate.com App. An app that connect
 *Requirements:*
 - Python 3.10 [Ensure to add to path]
 - Pipenv. Install with Pip(from Python) with `pip install pipenv`
-- PC
 - Browser. To test the endpoints or use the popular API testers:
   - Curl
   - Postman
@@ -20,21 +19,10 @@ This is the back end repository of the FindARoomate.com App. An app that connect
 - Perform migrations with `python manage.py migrate`
 - Create your superuser account with `python manage.py createsuperuser`. Fill in required details.
 - To start the server, run `python manage.py runserver`
-- You can start making requests by visiting http://localhost:8000
+- start making requests by visiting http://localhost:8000
 
-*For subsequent starting of the server*
-- `cd` into the repo
-- Run `pipenv shell` to activate the virutal environment
-- Perform migrations for the DB with `python manage.py migrate`
-- To start the server, run `python manage.py runserver`
-- You can start making requests by visiting http://localhost:8000
 
 *Note:*
-To install packages, use `pipenv install <package name>`. Do not attempt to use `pip install <package name>` whatsoever.
+To install packages, use `pipenv install <package name>`.
 
-## Got problems?
-Raise an issue.
-
-## Don't have problems?
-Nice
 
