@@ -164,6 +164,8 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_USE_SSL = True
 
+DEFAULT_FROM_EMAIL = "email@yourserver.com"
+SERVER_EMAIL = "email@yourserver.com"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
