@@ -44,7 +44,6 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser',
     'corsheaders',
 
     'authentify.apps.AuthentifyConfig',
@@ -62,7 +61,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
 
-REST_USE_JWT = True
+
 
 ROOT_URLCONF = 'FindARoomate.urls'
 
@@ -135,26 +134,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
 
-SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
-}
 
-DJOSER = {
-    'SEND_ACTIVATION_EMAIL': True,
-    "SEND_CONFIRMATION_EMAIL": True,
-    'ACTIVATION_URL': 'auth/activation/{uid}/{token}',
-    'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password-confirm/{uid}/{token}',
-    "SERIALIZERS": {},
-    "EMAIL": {
-        "activation": "djoser.email.ActivationEmail",
-    },
-}
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 

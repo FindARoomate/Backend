@@ -14,7 +14,6 @@ Django = "==4.0.1"
 django-heroku = "*"
 gunicorn = "*"
 dj-database-url = "*"
-djoser = "*"
 djangorestframework-simplejwt = "*"
 django-cors-headers = "*"
 

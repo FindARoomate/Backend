@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.mail import send_mail
 from FindARoomate.settings import EMAIL_HOST_USER
-from .models import Waitlist
+from .models import CustomUser, Waitlist
 
 
 class WaitlistSerializer(serializers.ModelSerializer):
@@ -28,3 +28,9 @@ class WaitlistSerializer(serializers.ModelSerializer):
                   fail_silently=False)
         value, created = Waitlist.objects.get_or_create(email=email)
         return value
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'password']
