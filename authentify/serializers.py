@@ -1,5 +1,9 @@
 from rest_framework import serializers
+
 from django.core.mail import send_mail
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+
 from FindARoomate.settings import EMAIL_HOST_USER
 from .models import CustomUser, Waitlist
 
@@ -29,8 +33,27 @@ class WaitlistSerializer(serializers.ModelSerializer):
         value, created = Waitlist.objects.get_or_create(email=email)
         return value
 
-class UserSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    #password2 = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password']
+        fields = ['email', 'username', 'password', ]#'password2']
+
+        # def validate(self, attrs):
+        #     if attrs['password'] != attrs['password2']:
+        #         raise serializers.ValidationError({"message": "Password fields do no match"})
+        #     return attrs
+
+        def create(self, validated_data):
+            user = CustomUser.objects.create(
+                username = validated_data['username'],
+                email = validated_data['email'],
+
+            )
+
+            user.set_password(validated_data['password'])
+            user.save()
+
+            return user 

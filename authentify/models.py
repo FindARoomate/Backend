@@ -16,6 +16,7 @@ class CustomUser(AbstractUser):
     slug = SlugField(max_length=250, unique=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
