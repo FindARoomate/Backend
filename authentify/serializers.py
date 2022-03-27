@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -85,11 +86,16 @@ class LoginSerializer(serializers.ModelSerializer):
 
         if not user:
             raise AuthenticationFailed('Invalid credentials, try again')
-        # if not user.is_active:
-        #     raise AuthenticationFailed('Account disabled, contact admin')
-        # if not user.is_verified:
-        #     raise AuthenticationFailed('Email is not verified')
+        
+        if not user.is_active:
+            raise ValidationError(detail='Account disabled, contact admin')
 
+        try:
+            user = CustomUser.objects.get(email__iexact=email.lower())
+        except CustomUser.DoesNotExist:
+            raise ValidationError(detail="No Account associated with this email")
+
+        
         return {
             'email': user.email,
             'tokens': user.tokens
