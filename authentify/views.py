@@ -10,9 +10,11 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
 
 from .models import Waitlist, CustomUser
-from .serializers import WaitlistSerializer, RegisterSerializer
+from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer
 from .tokens import account_activation_token
 
 class JoinWaitlist(CreateAPIView):
@@ -48,7 +50,7 @@ class Register(CreateAPIView):
         email = EmailMessage(mail_subject, message, to=[user.email])
         email.send()
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ActivateUser(APIView):
@@ -65,7 +67,24 @@ class ActivateUser(APIView):
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            return Response({"message": "You have been verified successfully"})
+            return Response({"message": "You have been verified successfully"},
+            status=status.HTTP_200_OK)
             
         else:
-            return Response({"error":'Activation link is invalid!'})
+            return Response({"error":'Activation link is invalid!'},
+            status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginAPIView(CreateAPIView):
+    """
+    This endpoint logins users
+    """
+
+    queryset = CustomUser.objects.all()
+    serializer_class = LoginSerializer
+    
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data['tokens'], status=status.HTTP_200_OK)

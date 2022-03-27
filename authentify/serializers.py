@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 
 from django.core.mail import send_mail
+from django.contrib import auth
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
@@ -38,25 +40,59 @@ class WaitlistSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    #password2 = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = CustomUser
         fields = ['email', 'username', 'password', ]#'password2']
 
-        # def validate(self, attrs):
-        #     if attrs['password'] != attrs['password2']:
-        #         raise serializers.ValidationError({"message": "Password fields do no match"})
-        #     return attrs
 
-        def create(self, validated_data):
-            user = CustomUser.objects.create(
-                username = validated_data['username'],
-                email = validated_data['email'],
+    def create(self, validated_data):
+        user = CustomUser.objects.create(
+            username = validated_data['username'],
+            email = validated_data['email'],
 
-            )
+        )
 
-            user.set_password(validated_data['password'])
-            user.save()
+        user.set_password(validated_data['password'])
+        user.is_active = False
+        user.save()
 
-            return user 
+        return user 
+
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255, min_length=3)
+    password = serializers.CharField(
+        max_length=68, min_length=6, write_only=True)
+    tokens = serializers.SerializerMethodField()
+
+    def get_tokens(self, obj):
+        user = CustomUser.objects.get(email=obj['email'])
+
+        return {
+            'refresh': user.tokens()['refresh'],
+            'access': user.tokens()['access']
+        }
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'password', 'tokens']
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        password = attrs.get('password', '')
+        user = auth.authenticate(email=email, password=password)
+
+
+        if not user:
+            raise AuthenticationFailed('Invalid credentials, try again')
+        # if not user.is_active:
+        #     raise AuthenticationFailed('Account disabled, contact admin')
+        # if not user.is_verified:
+        #     raise AuthenticationFailed('Email is not verified')
+
+        return {
+            'email': user.email,
+            'tokens': user.tokens
+        }
+
+        return super().validate(attrs)
