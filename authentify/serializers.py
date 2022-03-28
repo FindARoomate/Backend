@@ -1,20 +1,11 @@
-from email import message
 from django.forms import ValidationError
+from django.contrib import auth
+from django.contrib.auth.password_validation import validate_password
+
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
-from django.core.mail import send_mail
-from django.contrib import auth
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
-from django.core.mail import EmailMessage
-
-from FindARoomate.settings import EMAIL_HOST_USER
 from .models import CustomUser, Waitlist
-from .tokens import account_activation_token
-
 
 class WaitlistSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,6 +15,7 @@ class WaitlistSerializer(serializers.ModelSerializer):
     def save(self):
         email = self.validated_data['email']
         Waitlist.objects.create(email=email)
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(

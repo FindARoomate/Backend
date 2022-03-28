@@ -1,17 +1,13 @@
-from django import views
-from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from django.core.mail import EmailMessage
-from django.core.mail import send_mail
-
-from rest_framework.generics import CreateAPIView, ListCreateAPIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 
 from .models import Waitlist, CustomUser
@@ -19,11 +15,11 @@ from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer
 from .tokens import account_activation_token
 from FindARoomate.settings import EMAIL_HOST_USER
 
+
 class JoinWaitlist(CreateAPIView):
     """
     The View for the join_waitlist endpoint
     """
-
     queryset = Waitlist.objects.all()
     serializer_class = WaitlistSerializer
 
@@ -33,18 +29,17 @@ class JoinWaitlist(CreateAPIView):
         email = serializer.data['email']
         if Waitlist.objects.filter(email=email).exists():
             return Response({
-                "email":email,
-                "message":"email already joined waitlist"}, status=status.HTTP_400_BAD_REQUEST)
+                "email": email,
+                "message": "email already joined waitlist"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             serializer.save()
             subject = "Thanks for joining!"
             message = "You have successfully joined the find a roomate waitlist"
             send_mail(subject,
-                    message,
-                    EMAIL_HOST_USER,
-                    [email],
-                    fail_silently=False)
-
+                      message,
+                      EMAIL_HOST_USER,
+                      [email],
+                      fail_silently=False)
 
             return Response({
                 "email": email,
@@ -106,7 +101,6 @@ class LoginAPIView(CreateAPIView):
     """
     This endpoint logins users
     """
-
     queryset = CustomUser.objects.all()
     serializer_class = LoginSerializer
 
