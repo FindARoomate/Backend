@@ -36,6 +36,7 @@ class JoinWaitlist(CreateAPIView):
                 "email":email,
                 "message":"email already joined waitlist"}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            serializer.save()
             subject = "Thanks for joining!"
             message = "You have successfully joined the find a roomate waitlist"
             send_mail(subject,

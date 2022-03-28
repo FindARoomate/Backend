@@ -10,14 +10,14 @@ class TestAuthentication(TestSetUp):
 
     def test_user_can_register(self):
         response = self.client.post(
-            self.register_url, self.user_data, format="json")
+            self.register_url, self.user_data)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['email'], self.user_data['email'])
         self.assertEqual(response.data['username'], self.user_data['username'])
 
     def test_user_can_login_after_activation(self):
-        response = self.client.post(self.register_url, self.user_data, format="json")
+        response = self.client.post(self.register_url, self.user_data)
 
         user = CustomUser.objects.get(email=response.data['email'])
         user.is_active = True
@@ -30,8 +30,8 @@ class TestAuthentication(TestSetUp):
 
         self.assertEqual(response2.status_code, 200)
 
-    def test_user_cannot_login_after_activation(self):
-        self.client.post(self.register_url, self.user_data, format="json")
+    def test_user_cannot_login_before_activation(self):
+        self.client.post(self.register_url, self.user_data)
 
         response = self.client.post(self.login_url, {
             "email": self.user_data['email'],

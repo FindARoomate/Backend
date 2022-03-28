@@ -21,6 +21,9 @@ class WaitlistSerializer(serializers.ModelSerializer):
         model = Waitlist
         fields = ['email']
 
+    def save(self):
+        email = self.validated_data['email']
+        Waitlist.objects.create(email=email)
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
