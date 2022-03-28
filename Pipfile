@@ -17,6 +17,7 @@ dj-database-url = "*"
 djangorestframework-simplejwt = "*"
 django-cors-headers = "*"
 faker = "*"
+black = "*"
 
 [dev-packages]
 

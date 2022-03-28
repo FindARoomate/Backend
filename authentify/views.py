@@ -5,6 +5,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 
 from rest_framework.generics import CreateAPIView, ListCreateAPIView
 from rest_framework.permissions import AllowAny
@@ -16,6 +17,7 @@ from rest_framework import status
 from .models import Waitlist, CustomUser
 from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer
 from .tokens import account_activation_token
+from FindARoomate.settings import EMAIL_HOST_USER
 
 class JoinWaitlist(CreateAPIView):
     """
@@ -25,8 +27,32 @@ class JoinWaitlist(CreateAPIView):
     queryset = Waitlist.objects.all()
     serializer_class = WaitlistSerializer
 
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.data['email']
+        if Waitlist.objects.filter(email=email).exists():
+            return Response({
+                "email":email,
+                "message":"email already joined waitlist"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            subject = "Thanks for joining!"
+            message = "You have successfully joined the find a roomate waitlist"
+            send_mail(subject,
+                    message,
+                    EMAIL_HOST_USER,
+                    [email],
+                    fail_silently=False)
+
+
+            return Response({
+                "email": email,
+                "message": "email successfully submitted"
+            }, status=status.HTTP_201_CREATED)
+
+
 class Register(CreateAPIView):
-    
+
     """
     The view to register users
     """
@@ -45,8 +71,8 @@ class Register(CreateAPIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = account_activation_token.make_token(user)
         activation_link = "http://"+current_site+'/auth/activate/'+uid+'/'+token
-        message = "Hello {0},Kindly activate your account using this link\n {1}".format(user.username, 
-        activation_link)
+        message = "Hello {0},Kindly activate your account using this link\n {1}".format(user.username,
+                                                                                        activation_link)
         email = EmailMessage(mail_subject, message, to=[user.email])
         email.send()
 
@@ -68,11 +94,11 @@ class ActivateUser(APIView):
             user.is_active = True
             user.save()
             return Response({"message": "You have been verified successfully"},
-            status=status.HTTP_200_OK)
-            
+                            status=status.HTTP_200_OK)
+
         else:
-            return Response({"error":'Activation link is invalid!'},
-            status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": 'Activation link is invalid!'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginAPIView(CreateAPIView):
@@ -82,7 +108,6 @@ class LoginAPIView(CreateAPIView):
 
     queryset = CustomUser.objects.all()
     serializer_class = LoginSerializer
-    
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)

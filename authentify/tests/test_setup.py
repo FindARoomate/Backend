@@ -10,6 +10,7 @@ class TestSetUp(APITestCase):
     def setUp(self):
         self.register_url = reverse('register')
         self.login_url = reverse('login')
+        self.waitlist_url = reverse('join_waitlist')
         self.fake = Faker()
 
         self.user_data = {

@@ -9,6 +9,7 @@ from django.template.defaultfilters import slugify
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 class CustomUser(AbstractUser):
     """
     custom user created with email as the username field
@@ -17,7 +18,6 @@ class CustomUser(AbstractUser):
     slug = SlugField(max_length=250, unique=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
-    
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -32,7 +32,7 @@ class CustomUser(AbstractUser):
             'refresh': str(refresh),
             'access': str(refresh.access_token)
         }
-        
+
     def __str__(self):
         return self.email
 
@@ -53,7 +53,7 @@ class Waitlist(models.Model):
     """
     The waitlist model to add users that filled the waitlist form
     """
-    email = models.EmailField(max_length=100, unique=True)
+    email = models.EmailField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

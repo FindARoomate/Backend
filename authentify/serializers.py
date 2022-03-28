@@ -1,3 +1,4 @@
+from email import message
 from django.forms import ValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
@@ -14,43 +15,25 @@ from FindARoomate.settings import EMAIL_HOST_USER
 from .models import CustomUser, Waitlist
 from .tokens import account_activation_token
 
-class WaitlistSerializer(serializers.ModelSerializer):
-    message = "email successfully submitted"
 
+class WaitlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Waitlist
         fields = ['email']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["message"] = self.message
-        return representation
-
-    def save(self):
-        data = self.validated_data
-        email = data['email']
-        subject = "Thanks for joining!"
-        message = "You have successfully joined the find a roomate waitlist"
-        send_mail(subject,
-                  message,
-                  EMAIL_HOST_USER,
-                  [email],
-                  fail_silently=False)
-        value, created = Waitlist.objects.get_or_create(email=email)
-        return value
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password])
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'password', ]#'password2']
-
+        fields = ['email', 'username', 'password', ]  # 'password2']
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
-            username = validated_data['username'],
-            email = validated_data['email'],
+            username=validated_data['username'],
+            email=validated_data['email'],
 
         )
 
@@ -58,7 +41,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.is_active = False
         user.save()
 
-        return user 
+        return user
+
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
@@ -83,19 +67,18 @@ class LoginSerializer(serializers.ModelSerializer):
         password = attrs.get('password', '')
         user = auth.authenticate(email=email, password=password)
 
-
         if not user:
             raise AuthenticationFailed('Invalid credentials, try again')
-        
+
         if not user.is_active:
             raise ValidationError(detail='Account disabled, contact admin')
 
         try:
             user = CustomUser.objects.get(email__iexact=email.lower())
         except CustomUser.DoesNotExist:
-            raise ValidationError(detail="No Account associated with this email")
+            raise ValidationError(
+                detail="No Account associated with this email")
 
-        
         return {
             'email': user.email,
             'tokens': user.tokens
