@@ -7,6 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from .models import CustomUser, Waitlist
 
+
 class WaitlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Waitlist
@@ -80,3 +81,22 @@ class LoginSerializer(serializers.ModelSerializer):
         }
 
         return super().validate(attrs)
+
+
+class ResendActivationSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=225, min_length=3)
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', ]
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        user = CustomUser.objects.get(email=email)
+
+        if not user:
+            raise AuthenticationFailed('Invalid credentials, try again')
+
+        if user.is_active:
+            raise ValidationError(
+                {"message": "user has been activated already"})

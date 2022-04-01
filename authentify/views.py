@@ -11,9 +11,10 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from .models import Waitlist, CustomUser
-from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer
+from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer, ResendActivationSerializer
 from .tokens import account_activation_token
 from FindARoomate.settings import EMAIL_HOST_USER
+from .email import send_activation_email
 
 
 class JoinWaitlist(CreateAPIView):
@@ -62,15 +63,8 @@ class Register(CreateAPIView):
         serializer.save()
         user_data = serializer.data
         user = self.queryset.get(email=user_data['email'])
-        mail_subject = 'Activate your account.'
-        current_site = get_current_site(request).domain
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = account_activation_token.make_token(user)
-        activation_link = "http://"+current_site+'/auth/activate/'+uid+'/'+token
-        message = "Hello {0},Kindly activate your account using this link\n {1}".format(user.username,
-                                                                                        activation_link)
-        email = EmailMessage(mail_subject, message, to=[user.email])
-        email.send()
+
+        send_activation_email(request, user)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -108,3 +102,19 @@ class LoginAPIView(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data['tokens'], status=status.HTTP_200_OK)
+
+
+class ResendActivationView(CreateAPIView):
+
+    queryset = CustomUser.objects.all()
+    serializer_class = ResendActivationSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_data = serializer.data
+        user = self.queryset.get(email=user_data['email'])
+
+        send_activation_email(request, user)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
