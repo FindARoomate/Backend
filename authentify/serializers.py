@@ -1,36 +1,102 @@
+from django.forms import ValidationError
+from django.contrib import auth
+from django.contrib.auth.password_validation import validate_password
+
 from rest_framework import serializers
-from django.core.mail import send_mail
-from FindARoomate.settings import EMAIL_HOST_USER
+from rest_framework.exceptions import AuthenticationFailed
+
 from .models import CustomUser, Waitlist
 
 
 class WaitlistSerializer(serializers.ModelSerializer):
-    message = "email successfully submitted"
-
     class Meta:
         model = Waitlist
         fields = ['email']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["message"] = self.message
-        return representation
-
     def save(self):
-        data = self.validated_data
-        email = data['email']
-        subject = "Thanks for joining!"
-        message = "You have successfully joined the find a roomate waitlist"
-        send_mail(subject,
-                  message,
-                  EMAIL_HOST_USER,
-                  [email],
-                  fail_silently=False)
-        value, created = Waitlist.objects.get_or_create(email=email)
-        return value
+        email = self.validated_data['email']
+        Waitlist.objects.create(email=email)
 
-class UserSerializer(serializers.ModelSerializer):
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password])
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password']
+        fields = ['email', 'username', 'password', ]  # 'password2']
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+
+        )
+
+        user.set_password(validated_data['password'])
+        user.is_active = False
+        user.save()
+
+        return user
+
+
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255, min_length=3)
+    password = serializers.CharField(
+        max_length=68, min_length=6, write_only=True)
+    tokens = serializers.SerializerMethodField()
+
+    def get_tokens(self, obj):
+        user = CustomUser.objects.get(email=obj['email'])
+
+        return {
+            'refresh': user.tokens()['refresh'],
+            'access': user.tokens()['access']
+        }
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'password', 'tokens']
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        password = attrs.get('password', '')
+        user = auth.authenticate(email=email, password=password)
+
+        if not user:
+            raise AuthenticationFailed('Invalid credentials, try again')
+
+        if not user.is_active:
+            raise ValidationError(detail='Account disabled, contact admin')
+
+        try:
+            user = CustomUser.objects.get(email__iexact=email.lower())
+        except CustomUser.DoesNotExist:
+            raise ValidationError(
+                detail="No Account associated with this email")
+
+        return {
+            'email': user.email,
+            'tokens': user.tokens
+        }
+
+        return super().validate(attrs)
+
+
+class ResendActivationSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=225, min_length=3)
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', ]
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        user = CustomUser.objects.get(email=email)
+
+        if not user:
+            raise AuthenticationFailed('Invalid credentials, try again')
+
+        if user.is_active:
+            raise ValidationError(
+                {"message": "user has been activated already"})
