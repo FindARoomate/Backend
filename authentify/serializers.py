@@ -100,3 +100,35 @@ class ResendActivationSerializer(serializers.ModelSerializer):
         if user.is_active:
             raise ValidationError(
                 {"message": "user has been activated already"})
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+
+    old_password = serializers.CharField(write_only=True, required=True)
+    new_password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    new_password2 = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+
+        model = CustomUser
+        fields = ['old_password', 'new_password1', 'new_password2']
+
+    def validate(self, attrs):
+
+        if attrs['new_password1'] != attrs['new_password2']:
+
+            return serializers.ValidationError({"detail":"The password field doesn't match"})
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if user.check_password(value) != True:
+
+            return serializers.ValidationError({"detail": "Your old password is incorrect"})
+
+    def update(self, instance, validated_data):
+
+        instance.set_password(validated_data['new_password1'])
+
+        instance.save()
+
+        return instance

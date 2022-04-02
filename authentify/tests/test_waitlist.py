@@ -32,4 +32,7 @@ class TestWaitlist(TestSetUp):
         self.assertEqual(email_test.count(), 1)
         self.assertEqual(response1.status_code, 201)
         self.assertEqual(response2.status_code, 400)
-        self.assertEqual((response2.json()['message']), "email already joined waitlist")
+        self.assertEqual(
+            (response1.json()['message']), "email successfully submitted")
+        self.assertEqual(
+            (response2.json()['message']), "email already joined waitlist")

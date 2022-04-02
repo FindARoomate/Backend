@@ -1,17 +1,15 @@
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
 from django.core.mail import send_mail
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 
 from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
 from .models import Waitlist, CustomUser
-from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer, ResendActivationSerializer
+from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer, ResendActivationSerializer, ChangePasswordSerializer
 from .tokens import account_activation_token
 from FindARoomate.settings import EMAIL_HOST_USER
 from .email import send_activation_email
@@ -118,3 +116,17 @@ class ResendActivationView(CreateAPIView):
         send_activation_email(request, user)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ChangePassword(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+
+        user = CustomUser.objects.get(id=pk)
+        serializer = ChangePasswordSerializer(
+            user, data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"detail": "Your password has been successfully changed"})
