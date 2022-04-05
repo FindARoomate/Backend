@@ -10,7 +10,8 @@ from rest_framework import status
 
 from .models import Waitlist, CustomUser
 from .serializers import WaitlistSerializer, RegisterSerializer, \
-    ResendActivationSerializer, ResetPasswordSerializer, ResetPasswordConfirmSerializer
+    ResendActivationSerializer, ResetPasswordSerializer, ResetPasswordConfirmSerializer, \
+    ContactFormSerializer
 from .tokens import account_activation_token
 from FindARoomate.settings import EMAIL_HOST_USER
 from .email import send_activation_email, send_password_reset_email
@@ -140,7 +141,7 @@ class ResetPassword(CreateAPIView):
 
 
 class ResetPasswordConfirm(CreateAPIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = ResetPasswordConfirmSerializer
 
     def post(self, request, uid, token):
@@ -153,6 +154,37 @@ class ResetPasswordConfirm(CreateAPIView):
             serializer = self.serializer_class(
                 user, data=request.data, context={"request": request})
             serializer.is_valid(raise_exception=True)
-            serializer.save()
 
-        return Response({"detail": "Your password has been successfully changed"})
+            return Response({"detail": "Your password has been successfully changed"})
+
+        else:
+            return Response({"error": 'Activation link is invalid!'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactForm(CreateAPIView):
+
+    serializer_class = ContactFormSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.data['email']
+        name = serializer.data['name']
+        subject = "Contact form message from " + name
+        body = {
+            "name": serializer.data['name'],
+            "email": serializer.data['email'],
+            "message": serializer.data["message"]
+        }
+        message = "\n".join(body.values())
+        send_mail(subject,
+                  message,
+                  email,
+                  [EMAIL_HOST_USER],
+                  fail_silently=False)
+
+        return Response({
+            "success": "email successfully sent"
+        }, status=status.HTTP_200_OK)

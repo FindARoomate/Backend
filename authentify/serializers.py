@@ -117,25 +117,29 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
 
 class ResetPasswordConfirmSerializer(serializers.ModelSerializer):
 
-    old_password = serializers.CharField(write_only=True, required=True)
     new_password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password])
 
     class Meta:
 
         model = CustomUser
-        fields = ['old_password', 'new_password', ]
-
-    def validate_old_password(self, value):
-        user = self.context['request'].user
-        if user.check_password(value) != True:
-
-            return serializers.ValidationError({"detail": "Your old password is incorrect"})
+        fields = ['new_password', ]
 
     def update(self, instance, validated_data):
 
-        instance.set_password(validated_data['new_password'])
+        user = self.context['request'].user
 
-        instance.save()
+        if user.id == instance.id:
+            instance.set_password(validated_data['new_password'])
 
-        return instance
+            instance.save()
+
+            return instance
+        else:
+            raise ValidationError(
+                {"authorize": "You dont have permission for this user."})
+
+class ContactFormSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=250)
+    email = serializers.EmailField(max_length=225)
+    message = serializers.CharField(max_length=500)

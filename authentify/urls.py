@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import JoinWaitlist, Register, ActivateUser,\
-    ResendActivation, ResetPassword, ResetPasswordConfirm
+    ResendActivation, ResetPassword, ResetPasswordConfirm, ContactForm
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -17,5 +17,6 @@ urlpatterns = [
     path("login/", TokenObtainPairView.as_view(), name="login"),
     path('reset-password/', ResetPassword.as_view(), name="reset-password"),
     path('reset-password-confirm/<str:uid>/<str:token>', ResetPasswordConfirm.as_view(),
-         name="reset-password-confirm")
+         name="reset-password-confirm"),
+    path('contact-us/', ContactForm.as_view(), name="contact-us")
 ]
