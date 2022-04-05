@@ -9,6 +9,8 @@ from django.template.defaultfilters import slugify
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .managers import CustomUserManager
+
 
 class CustomUser(AbstractUser):
     """
@@ -22,16 +24,12 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
+    objects = CustomUserManager()
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.username)
         super(CustomUser, self).save(*args, **kwargs)
 
-    def tokens(self):
-        refresh = RefreshToken.for_user(self)
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token)
-        }
 
     def __str__(self):
         return self.email

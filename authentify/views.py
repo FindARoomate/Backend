@@ -9,10 +9,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from .models import Waitlist, CustomUser
-from .serializers import WaitlistSerializer, RegisterSerializer, LoginSerializer, ResendActivationSerializer, ChangePasswordSerializer
+from .serializers import WaitlistSerializer, RegisterSerializer, \
+    ResendActivationSerializer, ResetPasswordSerializer, ResetPasswordConfirmSerializer
 from .tokens import account_activation_token
 from FindARoomate.settings import EMAIL_HOST_USER
-from .email import send_activation_email
+from .email import send_activation_email, send_password_reset_email
 
 
 class JoinWaitlist(CreateAPIView):
@@ -89,20 +90,20 @@ class ActivateUser(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginAPIView(CreateAPIView):
-    """
-    This endpoint logins users
-    """
-    queryset = CustomUser.objects.all()
-    serializer_class = LoginSerializer
+# class Login(CreateAPIView):
+#     """
+#     This endpoint logins users
+#     """
+#     queryset = CustomUser.objects.all()
+#     serializer_class = LoginSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.data['tokens'], status=status.HTTP_200_OK)
+#     def post(self, request):
+#         serializer = self.serializer_class(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         return Response(serializer.data['tokens'], status=status.HTTP_200_OK)
 
 
-class ResendActivationView(CreateAPIView):
+class ResendActivation(CreateAPIView):
 
     queryset = CustomUser.objects.all()
     serializer_class = ResendActivationSerializer
@@ -118,15 +119,40 @@ class ResendActivationView(CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class ChangePassword(APIView):
+class ResetPassword(CreateAPIView):
+
+    serializer_class = ResetPasswordSerializer
+    queryset = CustomUser.objects.all()
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk):
-
-        user = CustomUser.objects.get(id=pk)
-        serializer = ChangePasswordSerializer(
-            user, data=request.data, context={"request": request})
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        user_data = serializer.data
+        user = self.queryset.get(email=user_data['email'])
+
+        send_password_reset_email(request, user)
+
+        return Response({"detail": "You have been sent an email for password change"},
+                        status=status.HTTP_200_OK)
+
+
+class ResetPasswordConfirm(CreateAPIView):
+    #permission_classes = [IsAuthenticated]
+    serializer_class = ResetPasswordConfirmSerializer
+
+    def post(self, request, uid, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uid))
+            user = CustomUser.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+        if user is not None and account_activation_token.check_token(user, token):
+            serializer = self.serializer_class(
+                user, data=request.data, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
         return Response({"detail": "Your password has been successfully changed"})

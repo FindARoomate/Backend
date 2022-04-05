@@ -1,11 +1,11 @@
-from django.forms import ValidationError
 from django.contrib import auth
 from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
 from .models import CustomUser, Waitlist
+from .utils import is_valid_email
 
 
 class WaitlistSerializer(serializers.ModelSerializer):
@@ -40,84 +40,91 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=255, min_length=3)
-    password = serializers.CharField(
-        max_length=68, min_length=6, write_only=True)
-    tokens = serializers.SerializerMethodField()
+# class LoginSerializer(serializers.ModelSerializer):
+#     email = serializers.EmailField(
+#         max_length=255, min_length=3, validators=[is_valid_email])
+#     password = serializers.CharField(
+#         max_length=68, min_length=6, write_only=True)
+#     tokens = serializers.SerializerMethodField()
 
-    def get_tokens(self, obj):
-        user = CustomUser.objects.get(email=obj['email'])
+#     def get_tokens(self, obj):
+#         user = CustomUser.objects.get(email=obj['email'])
 
-        return {
-            'refresh': user.tokens()['refresh'],
-            'access': user.tokens()['access']
-        }
+#         return {
+#             'refresh': user.tokens()['refresh'],
+#             'access': user.tokens()['access']
+#         }
 
-    class Meta:
-        model = CustomUser
-        fields = ['email', 'password', 'tokens']
+#     class Meta:
+#         model = CustomUser
+#         fields = ['email', 'password', 'tokens']
 
-    def validate(self, attrs):
-        email = attrs.get('email', '')
-        password = attrs.get('password', '')
-        user = auth.authenticate(email=email, password=password)
+#     def validate(self, attrs):
+#         email = attrs.get('email', '')
+#         password = attrs.get('password', '')
+#         user = auth.authenticate(email=email, password=password)
 
-        if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
+#         if not user:
+#             raise AuthenticationFailed('Invalid credentials, try again')
 
-        if not user.is_active:
-            raise ValidationError(detail='Account disabled, contact admin')
+#         if not user.is_active:
+#             raise ValidationError(detail='Account disabled, contact admin')
 
-        try:
-            user = CustomUser.objects.get(email__iexact=email.lower())
-        except CustomUser.DoesNotExist:
-            raise ValidationError(
-                detail="No Account associated with this email")
+#         return {
+#             'email': user.email,
+#             'tokens': user.tokens
+#         }
 
-        return {
-            'email': user.email,
-            'tokens': user.tokens
-        }
-
-        return super().validate(attrs)
+#         return super().validate(attrs)
 
 
 class ResendActivationSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=225, min_length=3)
+    email = serializers.EmailField(
+        max_length=225, min_length=3, validators=[is_valid_email])
 
     class Meta:
         model = CustomUser
         fields = ['email', ]
 
-    def validate(self, attrs):
-        email = attrs.get('email', '')
-        user = CustomUser.objects.get(email=email)
-
-        if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
+    def validate_email(self, value):
+        user = CustomUser.objects.get(email__iexact=value.lower())
 
         if user.is_active:
+            raise ValidationError(detail="user has been activated already")
+        else:
+            return value
+
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+
+    email = serializers.EmailField(min_length=2, validators=[is_valid_email])
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', ]
+
+    def save(self):
+        email = self.validated_data['email']
+
+        user = self.context['request'].user
+
+        if user.email != email:
             raise ValidationError(
-                {"message": "user has been activated already"})
+                {"authorize": "You dont have permission for this user."})
+        else:
+            return email
 
 
-class ChangePasswordSerializer(serializers.ModelSerializer):
+class ResetPasswordConfirmSerializer(serializers.ModelSerializer):
 
     old_password = serializers.CharField(write_only=True, required=True)
-    new_password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    new_password2 = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password])
 
     class Meta:
 
         model = CustomUser
-        fields = ['old_password', 'new_password1', 'new_password2']
-
-    def validate(self, attrs):
-
-        if attrs['new_password1'] != attrs['new_password2']:
-
-            return serializers.ValidationError({"detail":"The password field doesn't match"})
+        fields = ['old_password', 'new_password', ]
 
     def validate_old_password(self, value):
         user = self.context['request'].user
@@ -127,7 +134,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        instance.set_password(validated_data['new_password1'])
+        instance.set_password(validated_data['new_password'])
 
         instance.save()
 
