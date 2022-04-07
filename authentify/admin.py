@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.db.models import fields
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser, Waitlist
+from .models import CustomUser, Waitlist, Profile
 
 
 class CustomUserAdmin(UserAdmin):
@@ -30,9 +29,10 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
 
 
-class WaitlistAdmin(admin.ModelAdmin):
+class BaseClassAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(Waitlist, WaitlistAdmin)
+admin.site.register(Waitlist, BaseClassAdmin)
+admin.site.register(Profile, BaseClassAdmin)
