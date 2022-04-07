@@ -20,7 +20,7 @@ from .serializers import (
     ProfileSerializer,
 )
 from .tokens import account_activation_token
-from FindARoomate.settings import EMAIL_HOST_USER
+from django.conf import settings
 from .email import send_activation_email, send_password_reset_email
 
 
@@ -45,7 +45,7 @@ class JoinWaitlist(APIView):
             serializer.save()
             subject = "Thanks for joining!"
             message = "You have successfully joined the find a roomate waitlist"
-            send_mail(subject, message, EMAIL_HOST_USER, [email], fail_silently=False)
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
 
             return Response(
                 {"email": email, "message": "email successfully submitted"},
@@ -182,7 +182,7 @@ class ContactForm(APIView):
                 "message": serializer.data["message"],
             }
             message = "\n".join(body.values())
-            send_mail(subject, message, email, [EMAIL_HOST_USER], fail_silently=False)
+            send_mail(subject, message, email, [settings.EMAIL_HOST_USER], fail_silently=False)
 
             return Response(
                 {"success": "email successfully sent"}, status=status.HTTP_200_OK
@@ -197,14 +197,16 @@ class ContactForm(APIView):
 class CreateProfile(CreateAPIView):
 
     serializer_class = ProfileSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Profile
     parser_classes = (MultiPartParser,)
 
     def post(self, request):
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data, context={"request": request}
+        )
 
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

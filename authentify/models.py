@@ -71,9 +71,8 @@ class Profile(BaseClass):
     image = CloudinaryField("image")
     religion = models.CharField(max_length=250, blank=True)
     gender = models.CharField(max_length=250, blank=True, choices=GENDER)
-    phone_number = models.IntegerField()
+    phone_number = models.IntegerField(null=True)
     personality = models.CharField(max_length=250)
-
+    #profession =
     def __str__(self):
         return f"{self.user.username} Profile"
-

@@ -130,7 +130,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             "id",
-            "user",
             "fullname",
             "religion",
             "gender",
@@ -145,3 +144,17 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_image_url(self, obj):
 
         return f"https://res.cloudinary.com/dczoldewu/{obj.image}"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("image")
+        return representation
+
+    def create(self, validated_data):
+        current_user = self.context["request"].user
+        user = CustomUser.objects.get(email__iexact=current_user.email)
+
+        profile = Profile.objects.create(user=user, **validated_data)
+
+        return profile
+
