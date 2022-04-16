@@ -1,10 +1,9 @@
-from django.contrib import auth
 from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.exceptions import ValidationError
 
-from .models import CustomUser, Waitlist, Profile
+from .models import CustomUser, Waitlist
 from .utils import is_valid_email
 
 
@@ -27,13 +26,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             "email",
-            "username",
             "password",
         ]  # 'password2']
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
-            username=validated_data["username"],
             email=validated_data["email"],
         )
 
@@ -120,41 +117,3 @@ class ContactFormSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=250)
     email = serializers.EmailField(max_length=225)
     message = serializers.CharField(max_length=500)
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
-
-    class Meta:
-
-        model = Profile
-        fields = [
-            "id",
-            "fullname",
-            "religion",
-            "gender",
-            "image",
-            "image_url",
-            "phone_number",
-            "personality",
-            "created_at",
-        ]
-        extra_kwargs = {"created_at": {"read_only": True}}
-
-    def get_image_url(self, obj):
-
-        return f"https://res.cloudinary.com/dczoldewu/{obj.image}"
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("image")
-        return representation
-
-    def create(self, validated_data):
-        current_user = self.context["request"].user
-        user = CustomUser.objects.get(email__iexact=current_user.email)
-
-        profile = Profile.objects.create(user=user, **validated_data)
-
-        return profile
-

@@ -1,27 +1,23 @@
+from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-
+from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.parsers import MultiPartParser
 
-from .models import Waitlist, CustomUser, Profile
+from .email import send_activation_email, send_password_reset_email
+from .models import CustomUser, Waitlist
 from .serializers import (
-    WaitlistSerializer,
+    ContactFormSerializer,
     RegisterSerializer,
     ResendActivationSerializer,
-    ResetPasswordSerializer,
     ResetPasswordConfirmSerializer,
-    ContactFormSerializer,
-    ProfileSerializer,
+    ResetPasswordSerializer,
+    WaitlistSerializer,
 )
 from .tokens import account_activation_token
-from django.conf import settings
-from .email import send_activation_email, send_password_reset_email
 
 
 class JoinWaitlist(APIView):
@@ -181,7 +177,7 @@ class ContactForm(APIView):
                 "email": serializer.data["email"],
                 "message": serializer.data["message"],
             }
-            message = "\n".join(body.values())
+            message = "\n".join(body)
             send_mail(subject, message, email, [settings.EMAIL_HOST_USER], fail_silently=False)
 
             return Response(
@@ -193,20 +189,3 @@ class ContactForm(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-
-class CreateProfile(CreateAPIView):
-
-    serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = Profile
-    parser_classes = (MultiPartParser,)
-
-    def post(self, request):
-
-        serializer = self.get_serializer(
-            data=request.data, context={"request": request}
-        )
-
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)

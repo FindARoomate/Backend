@@ -1,19 +1,18 @@
 from django.urls import path
-from .views import (
-    JoinWaitlist,
-    Register,
-    ActivateUser,
-    ResendActivation,
-    ResetPassword,
-    ResetPasswordConfirm,
-    ContactForm,
-    CreateProfile,
-)
-
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
+)
+
+from .views import (
+    ActivateUser,
+    ContactForm,
+    JoinWaitlist,
+    Register,
+    ResendActivation,
+    ResetPassword,
+    ResetPasswordConfirm,
 )
 
 urlpatterns = [
@@ -29,5 +28,4 @@ urlpatterns = [
         name="reset-password-confirm",
     ),
     path("contact-us/", ContactForm.as_view(), name="contact-us"),
-    path("create-profile/", CreateProfile.as_view(), name="create-profile"),
 ]
