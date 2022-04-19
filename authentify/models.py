@@ -32,6 +32,7 @@ class Waitlist(models.Model):
     """
 
     email = models.EmailField(max_length=100)
+    name = models.CharField(max_length=250, null=True)
     created_at = models.DateField(default=timezone.now)
 
     def __str__(self):

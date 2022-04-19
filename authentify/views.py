@@ -32,19 +32,33 @@ class JoinWaitlist(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.data["email"]
+        name = serializer.data["name"]
         if Waitlist.objects.filter(email=email).exists():
             return Response(
-                {"email": email, "message": "email already joined waitlist"},
+                {
+                    "email": email,
+                    "name": name,
+                    "message": "email already joined waitlist",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         else:
             serializer.save()
             subject = "Thanks for joining!"
-            message = "You have successfully joined the find a roomate waitlist"
-            send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+            message = f"Dear{name}, You have successfully joined the find a roomate waitlist"
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
 
             return Response(
-                {"email": email, "message": "email successfully submitted"},
+                {
+                    "email": email,
+                    "message": "email successfully submitted",
+                },
                 status=status.HTTP_201_CREATED,
             )
 
@@ -80,9 +94,16 @@ class ActivateUser(APIView):
         try:
             uid = force_str(urlsafe_base64_decode(uid))
             user = CustomUser.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            CustomUser.DoesNotExist,
+        ):
             user = None
-        if user is not None and account_activation_token.check_token(user, token):
+        if user is not None and account_activation_token.check_token(
+            user, token
+        ):
             user.is_active = True
             user.save()
             return Response(
@@ -110,7 +131,10 @@ class ResendActivation(APIView):
 
         send_activation_email(request, user)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "An activation link has been sent to your email"},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ResetPassword(APIView):
@@ -144,15 +168,24 @@ class ResetPasswordConfirm(APIView):
         try:
             uid = force_str(urlsafe_base64_decode(uid))
             user = CustomUser.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            CustomUser.DoesNotExist,
+        ):
             user = None
-        if user is not None and account_activation_token.check_token(user, token):
+        if user is not None and account_activation_token.check_token(
+            user, token
+        ):
             serializer = self.serializer_class(
                 user, data=request.data, context={"request": request}
             )
             serializer.is_valid(raise_exception=True)
 
-            return Response({"detail": "Your password has been successfully changed"})
+            return Response(
+                {"detail": "Your password has been successfully changed"}
+            )
 
         else:
             return Response(
@@ -177,15 +210,21 @@ class ContactForm(APIView):
                 "email": serializer.data["email"],
                 "message": serializer.data["message"],
             }
-            message = "\n".join(body)
-            send_mail(subject, message, email, [settings.EMAIL_HOST_USER], fail_silently=False)
+            message = "\n".join(body.values())
+            send_mail(
+                subject,
+                message,
+                email,
+                [settings.EMAIL_HOST_USER],
+                fail_silently=False,
+            )
 
             return Response(
-                {"success": "email successfully sent"}, status=status.HTTP_200_OK
+                {"success": "email successfully sent"},
+                status=status.HTTP_200_OK,
             )
         else:
             return Response(
                 {"error": "An error occured, try again"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-

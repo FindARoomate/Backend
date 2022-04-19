@@ -1,5 +1,4 @@
 from django.contrib.auth.password_validation import validate_password
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -10,11 +9,12 @@ from .utils import is_valid_email
 class WaitlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Waitlist
-        fields = ["email"]
+        fields = ["email", "name"]
 
     def save(self):
         email = self.validated_data["email"]
-        Waitlist.objects.create(email=email)
+        name = self.validated_data["name"]
+        Waitlist.objects.create(email=email, name=name)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = [
             "email",
             "password",
-        ]  # 'password2']
+        ]
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
@@ -63,7 +63,9 @@ class ResendActivationSerializer(serializers.ModelSerializer):
 
 class ResetPasswordSerializer(serializers.ModelSerializer):
 
-    email = serializers.EmailField(min_length=2, validators=[is_valid_email])
+    email = serializers.EmailField(
+        min_length=2, validators=[is_valid_email]
+    )
 
     class Meta:
         model = CustomUser
