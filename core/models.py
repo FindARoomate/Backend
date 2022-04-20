@@ -25,7 +25,6 @@ class Profile(BaseClass):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
     fullname = models.CharField(max_length=250, blank=True)
-    image = CloudinaryField("image")
     religion = models.CharField(
         max_length=250, blank=True, choices=Religion.choices
     )
@@ -44,3 +43,27 @@ class Profile(BaseClass):
 
     def __str__(self):
         return f"{self.user} Profile"
+
+
+class ProfileImage(BaseClass):
+
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    image = CloudinaryField("image")
+
+class RoomateRequest(BaseClass):
+
+    state = models.CharField()
+    city = models.CharField()
+    street_address = models.CharField()
+    room_type = models.CharField()
+    no_of_persons = models.CharField()
+    no_of_current_roomies = models.CharField()
+    no_of_roomies_needed = models.CharField()
+    amenities = models.CharField()
+    date_to_move = models.CharField()
+    yearly_rent = models.CharField()
+    listing_title = models.CharField()
+    additional_information = models.CharField()
+
+class ListingImage(BaseClass):
+    pass

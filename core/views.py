@@ -1,3 +1,4 @@
+from itsdangerous import Serializer
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.parsers import MultiPartParser
@@ -6,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Profile
-from .serializers import ProfileSerializer
+from .serializers import ImageSerializer, ProfileSerializer
 
 
 class CreateProfile(CreateAPIView):
@@ -14,7 +15,7 @@ class CreateProfile(CreateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
     queryset = Profile
-    parser_classes = (MultiPartParser,)
+   
 
     def post(self, request):
 
@@ -58,3 +59,9 @@ class GetProfile(APIView):
         data = ProfileSerializer(profile).data
 
         return Response(data)
+
+class UploadImage(CreateAPIView):
+    
+    permissionclasses = [IsAuthenticated]
+    serializer_class = ImageSerializer
+    parser_classes = (MultiPartParser,)

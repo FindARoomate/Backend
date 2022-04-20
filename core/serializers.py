@@ -2,14 +2,11 @@ from authentify.models import CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Profile
+from .models import Image, Profile
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
-
     class Meta:
-
         model = Profile
         fields = [
             "id",
@@ -17,7 +14,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "religion",
             "gender",
             "image",
-            "image_url",
             "phone_number",
             "personality",
             "date_of_birth",
@@ -28,15 +24,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         extra_kwargs = {"created_at": {"read_only": True}}
-
-    def get_image_url(self, obj):
-
-        return f"https://res.cloudinary.com/dczoldewu/{obj.image}"
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("image")
-        return representation
 
     def create(self, validated_data):
         current_user = self.context["request"].user
@@ -52,7 +39,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.religion = validated_data["religion"]
         instance.gender = validated_data["gender"]
         instance.phone_number = validated_data["phone_number"]
-        # instance.image = validated_data["image"]
         instance.personality = validated_data["personality"]
         # instance.date_of_birth = validated_data["date_of_birth"]
         instance.profession = validated_data["profession"]
@@ -65,3 +51,28 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Image
+        fields = ["image", "image_url"]
+
+    def get_image_url(self, obj):
+
+        return f"https://res.cloudinary.com/dczoldewu/{obj.image}"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("image")
+        return representation
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        profile = Profile.objects.select_related("user").get(user=user)
+
+        image = Image.objects.create(profile=profile, **validated_data)
+
+        return image
