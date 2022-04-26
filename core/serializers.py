@@ -2,7 +2,7 @@ from authentify.models import CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Image, Profile
+from .models import Profile, ProfileImage, RequestImages, RoomateRequest
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -57,7 +57,7 @@ class ImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = Image
+        model = ProfileImage
         fields = ["image", "image_url"]
 
     def get_image_url(self, obj):
@@ -73,6 +73,56 @@ class ImageSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         profile = Profile.objects.select_related("user").get(user=user)
 
-        image = Image.objects.create(profile=profile, **validated_data)
+        image = ProfileImage.objects.create(profile=profile, **validated_data)
 
         return image
+
+
+class RequestImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.ReadOnlyField()
+
+    class Meta:
+        model = RequestImages
+        fields = ("image_url",)
+
+
+class RoomateRequestSerializer(serializers.ModelSerializer):
+
+    request_images = RequestImageSerializer(
+        many=True, read_only=True, source="images"
+    )
+
+    class Meta:
+        model = RoomateRequest
+        fields = [
+            "id",
+            "country",
+            "state",
+            "city",
+            "street_address",
+            "room_type",
+            "no_of_persons",
+            "no_of_current_roomies",
+            "amenities",
+            "yearly_rent",
+            "additional_cost",
+            "listing_title",
+            "roomate_description",
+            "additional_information",
+            "request_images",
+        ]
+        extra_kwargs = {"created_at": {"read_only": True}}
+
+    def create(self, validated_data):
+        images_data = self.context.get("request").FILES
+        current_user = self.context["request"].user
+        user = CustomUser.objects.get(email__iexact=current_user.email)
+
+        roomate_request = RoomateRequest.objects.create(
+            user=user, **validated_data
+        )
+
+        for image_data in images_data.getlist("file"):
+            RequestImages.objects.create(request=roomate_request, image_file=image_data)
+
+        return roomate_request

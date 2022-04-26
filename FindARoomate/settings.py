@@ -96,8 +96,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "findaroomate",
+        "USER": "postgres",
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
     }
 }
 
@@ -179,4 +183,3 @@ cloudinary.config(
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 django_heroku.settings(locals())
-

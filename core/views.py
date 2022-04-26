@@ -1,4 +1,3 @@
-from itsdangerous import Serializer
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.parsers import MultiPartParser
@@ -6,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Profile
-from .serializers import ImageSerializer, ProfileSerializer
+from .models import Profile, RoomateRequest
+from .serializers import ImageSerializer, ProfileSerializer, RoomateRequestSerializer
 
 
 class CreateProfile(CreateAPIView):
@@ -65,3 +64,27 @@ class UploadImage(CreateAPIView):
     permissionclasses = [IsAuthenticated]
     serializer_class = ImageSerializer
     parser_classes = (MultiPartParser,)
+
+class CreateRoomateRequest(CreateAPIView):
+
+    serializer_class = RoomateRequestSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = RoomateRequest
+   
+
+    def post(self, request):
+
+        serializer = self.get_serializer(
+            data=request.data, context={"request": request}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class GetRoomateRequests(APIView):
+    def get(self, request):
+
+        data = ProfileSerializer(many=True)
+
+        return Response(data)

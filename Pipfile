@@ -20,6 +20,7 @@ faker = "*"
 black = "*"
 pillow = "*"
 cloudinary = "*"
+django-filter = "*"
 
 [dev-packages]
 

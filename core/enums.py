@@ -17,3 +17,4 @@ class Religion(TextChoices):
 
     ISLAM = "ISLAM"
     CHRISTIANITY = "CHRISTIANITY"
+

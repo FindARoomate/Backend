@@ -5,12 +5,14 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 
 from .email import send_activation_email, send_password_reset_email
 from .models import CustomUser, Waitlist
 from .serializers import (
     ContactFormSerializer,
+    MyTokenObtainPairSerializer,
     RegisterSerializer,
     ResendActivationSerializer,
     ResetPasswordConfirmSerializer,
@@ -63,6 +65,10 @@ class JoinWaitlist(APIView):
             )
 
 
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+
 class Register(APIView):
 
     """
@@ -81,8 +87,15 @@ class Register(APIView):
         user = self.queryset.get(email=user_data["email"])
 
         send_activation_email(request, user)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        data = serializer.data
+        return Response(
+            {
+                "status": True,
+                "message": "You have been sent an activation link in your email",
+                "data": data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ActivateUser(APIView):

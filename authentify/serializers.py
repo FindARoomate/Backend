@@ -1,6 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import CustomUser, Waitlist
 from .utils import is_valid_email
@@ -17,8 +18,25 @@ class WaitlistSerializer(serializers.ModelSerializer):
         Waitlist.objects.create(email=email, name=name)
 
 
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        refresh = self.get_token(self.user)
+
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+        data["data"] = {"id": self.user.id, "email": self.user.email}
+
+        return data
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+
+    confirm_password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password]
     )
 
@@ -27,7 +45,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = [
             "email",
             "password",
+            "confirm_password",
         ]
+
+    def validate(self, data):
+        if data.get("password") != data.get("confirm_password"):
+            raise serializers.ValidationError(
+                "Those passwords don't match."
+            )
+        return data
 
     def create(self, validated_data):
         user = CustomUser.objects.create(

@@ -1,6 +1,10 @@
+import cloudinary
 from cloudinary.models import CloudinaryField
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
 from .enums import Gender, Personality, Religion
@@ -50,20 +54,42 @@ class ProfileImage(BaseClass):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     image = CloudinaryField("image")
 
+
 class RoomateRequest(BaseClass):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+    country = models.CharField(max_length=250, null=True)
+    state = models.CharField(max_length=250, null=True)
+    city = models.CharField(max_length=250, null=True)
+    street_address = models.CharField(max_length=250, null=True)
+    room_type = models.CharField(max_length=250, null=True)
+    no_of_persons = models.IntegerField()
+    no_of_current_roomies = models.IntegerField()
+    amenities = ArrayField(
+        models.CharField(max_length=250, null=True), size=12
+    )
+    date_to_move = models.DateTimeField(default=timezone.now)
+    yearly_rent = models.DecimalField(max_digits=100, decimal_places=2)
+    additional_cost = models.CharField(max_length=250, null=True)
+    listing_title = models.CharField(max_length=250, null=True)
+    additional_information = models.CharField(max_length=250, null=True)
 
-    state = models.CharField()
-    city = models.CharField()
-    street_address = models.CharField()
-    room_type = models.CharField()
-    no_of_persons = models.CharField()
-    no_of_current_roomies = models.CharField()
-    no_of_roomies_needed = models.CharField()
-    amenities = models.CharField()
-    date_to_move = models.CharField()
-    yearly_rent = models.CharField()
-    listing_title = models.CharField()
-    additional_information = models.CharField()
 
-class ListingImage(BaseClass):
-    pass
+class RequestImages(BaseClass):
+    request = models.ForeignKey(
+        RoomateRequest,
+        on_delete=models.CASCADE,
+        related_name="images",
+        null=False,
+    )
+    image_file = CloudinaryField("image")
+
+    @property
+    def image_url(self):
+        return f"https://res.cloudinary.com/dczoldewu/{self.image_file}"
+
+# delete image(s) from cloudinary on model's deletion
+@receiver(pre_delete, sender=RequestImages)
+def photo_delete(sender, instance, **kwargs):
+    cloudinary.uploader.destroy(instance.image_field.public_id)
