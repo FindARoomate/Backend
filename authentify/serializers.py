@@ -1,102 +1,147 @@
-from django.forms import ValidationError
-from django.contrib import auth
 from django.contrib.auth.password_validation import validate_password
-
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import CustomUser, Waitlist
+from .utils import is_valid_email
 
 
 class WaitlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Waitlist
-        fields = ['email']
+        fields = ["email", "name"]
 
     def save(self):
-        email = self.validated_data['email']
-        Waitlist.objects.create(email=email)
+        email = self.validated_data["email"]
+        name = self.validated_data["name"]
+        Waitlist.objects.create(email=email, name=name)
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        refresh = self.get_token(self.user)
+
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+        data["data"] = {"id": self.user.id, "email": self.user.email}
+
+        return data
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
-        write_only=True, required=True, validators=[validate_password])
+        write_only=True, required=True, validators=[validate_password]
+    )
+
+    confirm_password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'password', ]  # 'password2']
+        fields = [
+            "email",
+            "password",
+            "confirm_password",
+        ]
+
+    def validate(self, data):
+        if data.get("password") != data.get("confirm_password"):
+            raise serializers.ValidationError(
+                "Those passwords don't match."
+            )
+        return data
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-
+            email=validated_data["email"],
         )
 
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data["password"])
         user.is_active = False
         user.save()
 
         return user
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=255, min_length=3)
-    password = serializers.CharField(
-        max_length=68, min_length=6, write_only=True)
-    tokens = serializers.SerializerMethodField()
-
-    def get_tokens(self, obj):
-        user = CustomUser.objects.get(email=obj['email'])
-
-        return {
-            'refresh': user.tokens()['refresh'],
-            'access': user.tokens()['access']
-        }
-
-    class Meta:
-        model = CustomUser
-        fields = ['email', 'password', 'tokens']
-
-    def validate(self, attrs):
-        email = attrs.get('email', '')
-        password = attrs.get('password', '')
-        user = auth.authenticate(email=email, password=password)
-
-        if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
-
-        if not user.is_active:
-            raise ValidationError(detail='Account disabled, contact admin')
-
-        try:
-            user = CustomUser.objects.get(email__iexact=email.lower())
-        except CustomUser.DoesNotExist:
-            raise ValidationError(
-                detail="No Account associated with this email")
-
-        return {
-            'email': user.email,
-            'tokens': user.tokens
-        }
-
-        return super().validate(attrs)
-
-
 class ResendActivationSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=225, min_length=3)
+    email = serializers.EmailField(
+        max_length=225, min_length=3, validators=[is_valid_email]
+    )
 
     class Meta:
         model = CustomUser
-        fields = ['email', ]
+        fields = [
+            "email",
+        ]
 
-    def validate(self, attrs):
-        email = attrs.get('email', '')
-        user = CustomUser.objects.get(email=email)
-
-        if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
+    def validate_email(self, value):
+        user = CustomUser.objects.get(email__iexact=value.lower())
 
         if user.is_active:
+            raise ValidationError(detail="user has been activated already")
+        else:
+            return value
+
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+
+    email = serializers.EmailField(
+        min_length=2, validators=[is_valid_email]
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "email",
+        ]
+
+    def save(self):
+        email = self.validated_data["email"]
+
+        user = self.context["request"].user
+
+        if user.email != email:
             raise ValidationError(
-                {"message": "user has been activated already"})
+                {"authorize": "You dont have permission for this user."}
+            )
+        else:
+            return email
+
+
+class ResetPasswordConfirmSerializer(serializers.ModelSerializer):
+
+    new_password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+
+    class Meta:
+
+        model = CustomUser
+        fields = [
+            "new_password",
+        ]
+
+    def update(self, instance, validated_data):
+
+        user = self.context["request"].user
+
+        if user.id == instance.id:
+            instance.set_password(validated_data["new_password"])
+
+            instance.save()
+
+            return instance
+        else:
+            raise ValidationError(
+                {"authorize": "You dont have permission for this user."}
+            )
+
+
+class ContactFormSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=250)
+    email = serializers.EmailField(max_length=225)
+    message = serializers.CharField(max_length=500)
