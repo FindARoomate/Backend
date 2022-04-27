@@ -13,7 +13,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "fullname",
             "religion",
             "gender",
-            "image",
             "phone_number",
             "personality",
             "date_of_birth",
@@ -73,7 +72,9 @@ class ImageSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         profile = Profile.objects.select_related("user").get(user=user)
 
-        image = ProfileImage.objects.create(profile=profile, **validated_data)
+        image = ProfileImage.objects.create(
+            profile=profile, **validated_data
+        )
 
         return image
 
@@ -123,6 +124,8 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
         )
 
         for image_data in images_data.getlist("file"):
-            RequestImages.objects.create(request=roomate_request, image_file=image_data)
+            RequestImages.objects.create(
+                request=roomate_request, image_file=image_data
+            )
 
         return roomate_request

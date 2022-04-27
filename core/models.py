@@ -35,7 +35,7 @@ class Profile(BaseClass):
     gender = models.CharField(
         max_length=250, blank=True, choices=Gender.choices
     )
-    phone_number = models.IntegerField(null=True)
+    phone_number = models.CharField(max_length=23, null=True)
     date_of_birth = models.DateTimeField(default=timezone.now)
     personality = models.CharField(
         max_length=250, choices=Personality.choices
@@ -88,6 +88,7 @@ class RequestImages(BaseClass):
     @property
     def image_url(self):
         return f"https://res.cloudinary.com/dczoldewu/{self.image_file}"
+
 
 # delete image(s) from cloudinary on model's deletion
 @receiver(pre_delete, sender=RequestImages)

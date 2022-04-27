@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import CreateProfile, GetProfile, UpdateProfile
+from .views import CreateProfile, GetProfile, UpdateProfile, UploadImage
 
 urlpatterns = [
     path(
@@ -12,4 +12,7 @@ urlpatterns = [
         name="update-profile",
     ),
     path("profile/get/", GetProfile.as_view(), name="get-profile"),
+    path(
+        "profile/image-upload/", UploadImage.as_view(), name="upload-image"
+    ),
 ]
