@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Email Template</title>
+    <style>
+    div.email-body
+    {
+        padding: 25px;
+    }
+
+    div.body
+    {
+        padding: 20px;
+    }
+
+    div.footer
+    {
+        border-top: 0.5px solid rgba(125, 125, 125, 0.45);
+        padding-top: 40px;
+    }
+    
+    h6{
+        font-family: "Syne";
+        font-size: 20px;
+        max-width: 400px;
+        margin: auto;
+
+    }
+    p{
+        font-family: "Syne";
+        font-size: 20px;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    p.connect-with-us
+    {
+        color: #0029DD;
+        font-family: "Open Sans";
+        font-weight: 700;
+        text-align: center;
+    }
+
+    div.icons
+    {
+        padding: 10px 0px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    div.icons img
+    {
+        margin: 0 12px;
+    }
+
+    p.copyright
+    {
+        text-align: center;
+        font-size: 18px;
+        color: #7D7D7D;
+        font-family: "Open Sans"
+    }
+
+    div.logo
+    {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    /* Tablet and Desktop view */
+    @media screen and (min-width: 760px) 
+    {
+        
+        div.logo
+        {
+            margin-top: 40px;
+        }
+
+        div.icons
+        {
+            padding: 40px 0px;
+        }
+    }
+
+    </style>
+</head>
+<body>
+    {% load static %}
+
+    <div class="email-body">
+        <div class="body">
+            <h6>
+                Hello, {{ name }} </h6>
+            </br></br>
+
+            <p>
+                Thank you for joining our waitlist. We’ll let you know the moment we launch. Ensure you keep an eye on your inbox. </br></br>
+        
+                In the meantime, connect with us on social media.
+            </p>
+        </div>
+        <div class="footer">
+            <p class="connect-with-us">Connect with us on</p>
+            <div class="icons">
+                <a href="https://web.facebook.com/Findaroommatecom-100316889345701">
+                    <img src="{% static "https://res.cloudinary.com/dczoldewu/image/upload/v1651080532/Email%20template%20assets/facebook_icon_hjqr01.svg" %}"/>       </a>
+                <a href="https://www.instagram.com/findaroommate_/">
+                    <img src="{% static "https://res.cloudinary.com/dczoldewu/image/upload/v1651080532/Email%20template%20assets/instagram_icon_xyvmhn.svg" %}"/>
+                </a>
+                <a href="https://twitter.com/Findaroommate_">
+                    <img src="{% static "https://res.cloudinary.com/dczoldewu/image/upload/v1651080532/Email%20template%20assets/twitter_icon_arox8w.svg" %}"/>
+                </a>
+                <a href="https://www.linkedin.com/in/findaroommate">
+                    <img src="{% static "https://res.cloudinary.com/dczoldewu/image/upload/v1651080532/Email%20template%20assets/linkedin_icon_cov9q4.svg" %}"/>
+                </a>
+            </div>
+            <p class="copyright">FindARoommate.com &copy; 2022.</p>
+            <div class="logo">
+                <a href="https://findaroommate.com">
+                    <img src="{% static "https://res.cloudinary.com/dczoldewu/image/upload/v1651080532/Email%20template%20assets/find_a_roommate_logo_wmpbtd.svg" %}"/>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

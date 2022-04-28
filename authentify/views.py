@@ -1,12 +1,15 @@
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
+from django.template import Context
+from django.template.loader import get_template
 from django.utils.encoding import force_str
+from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .email import send_activation_email, send_password_reset_email
 from .models import CustomUser, Waitlist
@@ -46,15 +49,20 @@ class JoinWaitlist(APIView):
             )
         else:
             serializer.save()
-            subject = "Thanks for joining!"
-            message = f"Dear{name}, You have successfully joined the find a roomate waitlist"
-            send_mail(
-                subject,
-                message,
-                settings.EMAIL_HOST_USER,
-                [email],
-                fail_silently=False,
+            plaintext = get_template("waitlist.txt")
+            htmly = get_template("waitlist.html")
+            d = {"name": name}
+            subject = "You're on the Waitlist!"
+            from_email = settings.EMAIL_HOST_USER
+            to = email
+            html_content = htmly.render(d)
+            text_content = strip_tags(html_content)
+
+            msg = EmailMultiAlternatives(
+                subject, text_content, from_email, [to]
             )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
 
             return Response(
                 {
