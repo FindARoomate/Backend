@@ -1,3 +1,6 @@
+import os
+from email.mime.image import MIMEImage
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, send_mail
 from django.template import Context
@@ -48,7 +51,6 @@ class JoinWaitlist(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         else:
-            serializer.save()
             plaintext = get_template("waitlist.txt")
             htmly = get_template("waitlist.html")
             d = {"name": name}
@@ -62,8 +64,23 @@ class JoinWaitlist(APIView):
                 subject, text_content, from_email, [to]
             )
             msg.attach_alternative(html_content, "text/html")
-            msg.send()
+            msg.mixed_subtype = "related"
 
+            for f in [
+                "facebook.png",
+                "instagram.png",
+                "linkedin.png",
+                "roomie.png",
+                "twitter.png",
+            ]:
+                fp = open(os.path.join(os.path.dirname(__file__), f), "rb")
+                msg_img = MIMEImage(fp.read(), _subtype="jpg")
+                fp.close()
+                msg_img.add_header("Content-ID", "<{}>".format(f))
+                msg.attach(msg_img)
+
+            msg.send()
+            serializer.save()
             return Response(
                 {
                     "email": email,
