@@ -19,8 +19,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             "profession",
             "bio",
             "age",
+            "roomie_gender",
+            "roomie_personality",
+            "roomie_age",
+            "roomie_religion",
             "roomate_description",
             "created_at",
+            "updated_at",
         ]
         extra_kwargs = {"created_at": {"read_only": True}}
 
@@ -28,9 +33,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         current_user = self.context["request"].user
         user = CustomUser.objects.get(email__iexact=current_user.email)
 
-        profile = Profile.objects.create(user=user, **validated_data)
+        if Profile.objects.filter(user=user).exists():
+            raise ValidationError(
+                {"detail": "Profile with this user already exists"}
+            )
+        else:
 
-        return profile
+            profile = Profile.objects.create(user=user, **validated_data)
+
+            return profile
 
     def update(self, instance, validated_data):
 

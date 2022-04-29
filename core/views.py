@@ -6,7 +6,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Profile, RoomateRequest
-from .serializers import ImageSerializer, ProfileSerializer, RoomateRequestSerializer
+from .serializers import (
+    ImageSerializer,
+    ProfileSerializer,
+    RoomateRequestSerializer,
+)
 
 
 class CreateProfile(CreateAPIView):
@@ -14,7 +18,6 @@ class CreateProfile(CreateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
     queryset = Profile
-   
 
     def post(self, request):
 
@@ -45,10 +48,7 @@ class UpdateProfile(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(
-            {"detail": "Profile updated successfully"},
-            status=status.HTTP_200_OK,
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GetProfile(APIView):
@@ -59,18 +59,19 @@ class GetProfile(APIView):
 
         return Response(data)
 
+
 class UploadImage(CreateAPIView):
-    
+
     permissionclasses = [IsAuthenticated]
     serializer_class = ImageSerializer
     parser_classes = (MultiPartParser,)
+
 
 class CreateRoomateRequest(CreateAPIView):
 
     serializer_class = RoomateRequestSerializer
     permission_classes = [IsAuthenticated]
     queryset = RoomateRequest
-   
 
     def post(self, request):
 
@@ -81,6 +82,7 @@ class CreateRoomateRequest(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class GetRoomateRequests(APIView):
     def get(self, request):

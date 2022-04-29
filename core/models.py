@@ -28,22 +28,32 @@ class Profile(BaseClass):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    fullname = models.CharField(max_length=250, blank=True)
+    fullname = models.CharField(max_length=250, blank=True, null=True)
     religion = models.CharField(
-        max_length=250, blank=True, choices=Religion.choices
+        max_length=250, blank=True, choices=Religion.choices, null=True
     )
     gender = models.CharField(
-        max_length=250, blank=True, choices=Gender.choices
+        max_length=250, blank=True, choices=Gender.choices, null=True
     )
     phone_number = models.CharField(max_length=23, null=True)
     date_of_birth = models.DateTimeField(default=timezone.now)
     personality = models.CharField(
-        max_length=250, choices=Personality.choices
+        max_length=250, choices=Personality.choices, null=True
     )
-    profession = models.CharField(max_length=250)
-    bio = models.TextField(max_length=250)
-    age = models.IntegerField()
-    roomate_description = models.TextField(max_length=250)
+    profession = models.CharField(max_length=250, null=True)
+    bio = models.TextField(max_length=250, null=True)
+    age = models.IntegerField(null=True)
+    roomie_gender = models.CharField(
+        max_length=250, choices=Gender.choices, null=True
+    )
+    roomie_religion = models.CharField(
+        max_length=250, choices=Religion.choices, null=True
+    )
+    roomie_personality = models.CharField(
+        max_length=250, choices=Personality.choices, null=True
+    )
+    roomie_age = models.IntegerField(null=True)
+    roomate_description = models.TextField(max_length=250, null=True)
 
     def __str__(self):
         return f"{self.user} Profile"
