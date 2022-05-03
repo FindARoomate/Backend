@@ -1,5 +1,6 @@
+import django_filters
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -71,7 +72,8 @@ class CreateRoomateRequest(CreateAPIView):
 
     serializer_class = RoomateRequestSerializer
     permission_classes = [IsAuthenticated]
-    queryset = RoomateRequest
+    queryset = RoomateRequest.objects.all()
+    parser_classes = (MultiPartParser,)
 
     def post(self, request):
 
@@ -84,9 +86,19 @@ class CreateRoomateRequest(CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class GetRoomateRequests(APIView):
-    def get(self, request):
 
-        data = ProfileSerializer(many=True)
+class RoomateRequestFilter(django_filters.FilterSet):
+    religion = django_filters.CharFilter(field_name="profile__religion")
+    gender = django_filters.CharFilter(field_name="profile__gender")
+    
+    class Meta:
+        model = RoomateRequest
+        fields = ['city', 'country', 'state', 'gender', 'religion', 'room_type']
 
-        return Response(data)
+
+class GetRoomateRequests(ListAPIView):
+    serializer_class = RoomateRequestSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = RoomateRequest.objects.all()
+    filter_class = RoomateRequestFilter
+   

@@ -1,6 +1,13 @@
 from django.urls import path
 
-from .views import CreateProfile, GetProfile, UpdateProfile, UploadImage
+from .views import (
+    CreateProfile,
+    CreateRoomateRequest,
+    GetProfile,
+    GetRoomateRequests,
+    UpdateProfile,
+    UploadImage,
+)
 
 urlpatterns = [
     path(
@@ -14,5 +21,15 @@ urlpatterns = [
     path("profile/get/", GetProfile.as_view(), name="get-profile"),
     path(
         "profile/image-upload/", UploadImage.as_view(), name="upload-image"
+    ),
+    path(
+        "request/create/",
+        CreateRoomateRequest.as_view(),
+        name="create-roomate-request",
+    ),
+    path(
+        "request/get/",
+        GetRoomateRequests.as_view(),
+        name="get-roomate-requests",
     ),
 ]

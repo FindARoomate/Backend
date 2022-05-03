@@ -22,6 +22,7 @@ pillow = "*"
 cloudinary = "*"
 django-filter = "*"
 whitenoise = "*"
+requests = "*"
 
 [dev-packages]
 

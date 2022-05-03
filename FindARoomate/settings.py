@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "cloudinary",
     "corsheaders",
+    "django_filters",
     "authentify.apps.AuthentifyConfig",
     "core.apps.CoreConfig",
 ]
@@ -109,6 +110,9 @@ DATABASES = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
     ),
 }
 
@@ -179,6 +183,7 @@ cloudinary.config(
     api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
 )
 
+POSITION_ACCESS_KEY = os.environ.get("POSITION_ACCESS_KEY")
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

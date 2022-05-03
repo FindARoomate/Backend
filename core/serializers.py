@@ -1,3 +1,4 @@
+import requests
 from authentify.models import CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -103,6 +104,8 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
     request_images = RequestImageSerializer(
         many=True, read_only=True, source="images"
     )
+    latitude = serializers.ReadOnlyField()
+    longitude = serializers.ReadOnlyField()
 
     class Meta:
         model = RoomateRequest
@@ -112,26 +115,28 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
             "state",
             "city",
             "street_address",
+            "latitude",
+            "longitude",
             "room_type",
             "no_of_persons",
             "no_of_current_roomies",
             "amenities",
-            "yearly_rent",
+            "rent_per_person",
             "additional_cost",
             "listing_title",
-            "roomate_description",
             "additional_information",
             "request_images",
+             "is_active",
         ]
         extra_kwargs = {"created_at": {"read_only": True}}
 
     def create(self, validated_data):
         images_data = self.context.get("request").FILES
-        current_user = self.context["request"].user
-        user = CustomUser.objects.get(email__iexact=current_user.email)
+        user = self.context["request"].user
+        profile = Profile.objects.select_related("user").get(user=user)
 
         roomate_request = RoomateRequest.objects.create(
-            user=user, **validated_data
+            profile=profile, **validated_data
         )
 
         for image_data in images_data.getlist("file"):
