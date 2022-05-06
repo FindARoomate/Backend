@@ -1,17 +1,13 @@
 import django_filters
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Profile, RoomateRequest
-from .serializers import (
-    ImageSerializer,
-    ProfileSerializer,
-    RoomateRequestSerializer,
-)
+from .serializers import ImageSerializer, ProfileSerializer, RoomateRequestSerializer
 
 
 class CreateProfile(CreateAPIView):
@@ -73,8 +69,7 @@ class CreateRoomateRequest(CreateAPIView):
     serializer_class = RoomateRequestSerializer
     permission_classes = [IsAuthenticated]
     queryset = RoomateRequest.objects.all()
-    parser_classes = (MultiPartParser,)
-
+   
     def post(self, request):
 
         serializer = self.get_serializer(

@@ -101,9 +101,6 @@ class RequestImageSerializer(serializers.ModelSerializer):
 
 class RoomateRequestSerializer(serializers.ModelSerializer):
 
-    request_images = RequestImageSerializer(
-        many=True, read_only=True, source="images"
-    )
     latitude = serializers.ReadOnlyField()
     longitude = serializers.ReadOnlyField()
 
@@ -125,23 +122,16 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
             "additional_cost",
             "listing_title",
             "additional_information",
-            "request_images",
              "is_active",
         ]
         extra_kwargs = {"created_at": {"read_only": True}}
 
     def create(self, validated_data):
-        images_data = self.context.get("request").FILES
         user = self.context["request"].user
         profile = Profile.objects.select_related("user").get(user=user)
 
         roomate_request = RoomateRequest.objects.create(
             profile=profile, **validated_data
         )
-
-        for image_data in images_data.getlist("file"):
-            RequestImages.objects.create(
-                request=roomate_request, image_file=image_data
-            )
-
+        roomate_request.is_active = True
         return roomate_request
