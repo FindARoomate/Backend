@@ -47,7 +47,7 @@ class Profile(BaseClass):
     )
     profession = models.CharField(max_length=250, null=True)
     bio = models.TextField(max_length=250, null=True)
-    age = models.IntegerField(null=True)
+    age_range = models.CharField(max_length=250, null=True)
     roomie_gender = models.CharField(
         max_length=250, choices=Gender.choices, null=True
     )
@@ -91,6 +91,8 @@ class RoomateRequest(BaseClass):
     additional_cost = models.CharField(max_length=250, null=True)
     listing_title = models.CharField(max_length=250, null=True)
     additional_information = models.CharField(max_length=250, null=True)
+    latitude = models.DecimalField(max_digits=200, decimal_places=10, null=True)
+    longitude = models.DecimalField(max_digits=200, decimal_places=10, null=True)
     is_active = models.BooleanField(default=False, null=True)
 
     def __str__(self):
@@ -116,24 +118,14 @@ class RoomateRequest(BaseClass):
         result = json.loads(result)
         latitude = result["data"][0]["latitude"]
         longitude = result["data"][0]["longitude"]
-        result = [latitude, longitude]
 
-        return result
+        return latitude, longitude
 
-    @property
-    def latitude(self):
-
-        response = self.get_lat_and_long()
-
-        return response[0]
-
-    @property
-    def longitude(self):
-
-        response = self.get_lat_and_long()
-
-        return response[1]
-
+    def save(self, *args, **kwarg):
+        latitude, longitude = self.get_lat_and_long()
+        self.latitude = latitude
+        self.longitude = longitude
+        super(RoomateRequest, self).save(*args, **kwarg)
 
 class RequestImages(BaseClass):
     request = models.ForeignKey(

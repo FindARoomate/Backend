@@ -5,16 +5,16 @@ class Gender(TextChoices):
 
     MALE = "MALE"
     FEMALE = "FEMALE"
-   
+    OTHERS = "I_DON'T_MIND"
 
 class Personality(TextChoices):
 
     INTROVERT = "INTROVERT"
     EXTROVERT = "EXTROVERT"
-    OTHERS = "DON'T MIND"
+    OTHERS = "I_DON'T_MIND"
 
 class Religion(TextChoices):
 
     ISLAM = "ISLAM"
     CHRISTIANITY = "CHRISTIANITY"
-    OTHERS = "DON'T MIND"
+    OTHERS = "I_DON'T_MIND"

@@ -1,12 +1,15 @@
 from django.urls import path
 
 from .views import (
+    ActivateRequest,
     CreateProfile,
     CreateRoomateRequest,
+    GetOneRoomateRequest,
     GetProfile,
     GetRoomateRequests,
     UpdateProfile,
     UploadImage,
+    DeactivateRequest,
 )
 
 urlpatterns = [
@@ -31,5 +34,20 @@ urlpatterns = [
         "request/get/",
         GetRoomateRequests.as_view(),
         name="get-roomate-requests",
+    ),
+    path(
+        "request/get/<str:pk>/",
+        GetOneRoomateRequest.as_view(),
+        name="get-one-roomate-request",
+    ),
+    path(
+        "request/activate/<str:pk>/",
+        ActivateRequest.as_view(),
+        name="activate-a-request",
+    ),
+    path(
+        "request/deactivate/<str:pk>/",
+        DeactivateRequest.as_view(),
+        name="deactivate-a-request",
     ),
 ]

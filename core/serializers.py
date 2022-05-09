@@ -19,7 +19,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "date_of_birth",
             "profession",
             "bio",
-            "age",
+            "age_range",
             "roomie_gender",
             "roomie_personality",
             "roomie_age",
@@ -115,6 +115,7 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
             "latitude",
             "longitude",
             "room_type",
+            "date_to_move",
             "no_of_persons",
             "no_of_current_roomies",
             "amenities",
@@ -122,7 +123,7 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
             "additional_cost",
             "listing_title",
             "additional_information",
-             "is_active",
+            "is_active",
         ]
         extra_kwargs = {"created_at": {"read_only": True}}
 
