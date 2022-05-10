@@ -4,12 +4,13 @@ from .views import (
     ActivateRequest,
     CreateProfile,
     CreateRoomateRequest,
+    DeactivateRequest,
     GetOneRoomateRequest,
     GetProfile,
     GetRoomateRequests,
+    RequestImageView,
     UpdateProfile,
     UploadImage,
-    DeactivateRequest,
 )
 
 urlpatterns = [
@@ -49,5 +50,10 @@ urlpatterns = [
         "request/deactivate/<str:pk>/",
         DeactivateRequest.as_view(),
         name="deactivate-a-request",
+    ),
+    path(
+        "request/image/upload/",
+        RequestImageView.as_view(),
+        name="request-image",
     ),
 ]

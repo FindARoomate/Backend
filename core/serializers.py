@@ -96,7 +96,11 @@ class RequestImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RequestImages
-        fields = ("image_url",)
+        fields = (
+            "request",
+            "image_file",
+            "image_url",
+        )
 
 
 class RoomateRequestSerializer(serializers.ModelSerializer):
@@ -129,10 +133,17 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context["request"].user
-        profile = Profile.objects.select_related("user").get(user=user)
 
-        roomate_request = RoomateRequest.objects.create(
-            profile=profile, **validated_data
-        )
-        roomate_request.is_active = True
-        return roomate_request
+        try:
+            profile = Profile.objects.select_related("user").get(user=user)
+
+            roomate_request = RoomateRequest.objects.create(
+                profile=profile, **validated_data
+            )
+            roomate_request.is_active = True
+            return roomate_request
+
+        except Profile.DoesNotExist:
+            return serializers.ValidationError(
+                detail="no profile created for the logged in user"
+            )

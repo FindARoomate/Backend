@@ -1,4 +1,5 @@
 import django_filters
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -6,16 +7,18 @@ from rest_framework.generics import (
     RetrieveAPIView,
     UpdateAPIView,
 )
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Profile, RoomateRequest
+from .helpers import modify_input_for_multiple_files
+from .models import Profile, RequestImages, RoomateRequest
 from .serializers import (
     ImageSerializer,
     ProfileSerializer,
     RoomateRequestSerializer,
+    RequestImageSerializer
 )
 
 
@@ -180,3 +183,33 @@ class ActivateRequest(UpdateAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
+class RequestImageView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get(self, request):
+        all_images = RequestImages.objects.all()
+        serializer = RequestImageSerializer(all_images, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    def post(self, request, *args, **kwargs):
+        request = request.data.get('request')
+
+        # converts querydict to original dict
+        images = dict((request.data).lists())['image_file']
+        flag = 1
+        arr = []
+        for img_name in images:
+            modified_data = modify_input_for_multiple_files(request,
+                                                            img_name)
+            file_serializer = RequestImageSerializer(data=modified_data)
+            if file_serializer.is_valid():
+                file_serializer.save()
+                arr.append(file_serializer.data)
+            else:
+                flag = 0
+
+        if flag == 1:
+            return Response(arr, status=status.HTTP_201_CREATED)
+        else:
+            return Response(arr, status=status.HTTP_400_BAD_REQUEST)
