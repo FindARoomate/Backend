@@ -1,3 +1,5 @@
+import json
+
 import django_filters
 from django.http import JsonResponse
 from rest_framework import status
@@ -7,24 +9,23 @@ from rest_framework.generics import (
     RetrieveAPIView,
     UpdateAPIView,
 )
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .helpers import modify_input_for_multiple_files
-from .models import Profile, RequestImages, RoomateRequest
+from .models import Profile, RoomateRequest
 from .serializers import (
-    ImageSerializer,
     ProfileSerializer,
+    RequestImageSerializer,
     RoomateRequestSerializer,
-    RequestImageSerializer
 )
 
 
 class CreateProfile(CreateAPIView):
 
     serializer_class = ProfileSerializer
+    parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated]
     queryset = Profile
 
@@ -69,36 +70,12 @@ class GetProfile(APIView):
         return Response(data)
 
 
-class UploadImage(CreateAPIView):
-
-    permissionclasses = [IsAuthenticated]
-    serializer_class = ImageSerializer
-    parser_classes = (MultiPartParser,)
-
-
 class CreateRoomateRequest(CreateAPIView):
 
     serializer_class = RoomateRequestSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser,)
     queryset = RoomateRequest.objects.all()
-
-    def post(self, request):
-        user = request.user
-        profile = Profile.objects.get(user=user)
-        profile = ProfileSerializer(profile)
-        serializer = self.get_serializer(
-            data=request.data, context={"request": request}
-        )
-
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(
-            {
-                "request_data": serializer.data,
-                "profile_data": profile.data,
-            },
-            status=status.HTTP_201_CREATED,
-        )
 
 
 class RoomateRequestFilter(django_filters.FilterSet):
@@ -128,6 +105,7 @@ class GetOneRoomateRequest(RetrieveAPIView):
     serializer_class = RoomateRequestSerializer
     queryset = RoomateRequest.objects.all()
 
+
 class DeactivateRequest(UpdateAPIView):
 
     permission_classes = [
@@ -156,6 +134,7 @@ class DeactivateRequest(UpdateAPIView):
             status=status.HTTP_200_OK,
         )
 
+
 class ActivateRequest(UpdateAPIView):
 
     permission_classes = [
@@ -183,33 +162,3 @@ class ActivateRequest(UpdateAPIView):
             },
             status=status.HTTP_200_OK,
         )
-
-class RequestImageView(APIView):
-    parser_classes = (MultiPartParser, FormParser)
-
-    def get(self, request):
-        all_images = RequestImages.objects.all()
-        serializer = RequestImageSerializer(all_images, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    def post(self, request, *args, **kwargs):
-        request = request.data.get('request')
-
-        # converts querydict to original dict
-        images = dict((request.data).lists())['image_file']
-        flag = 1
-        arr = []
-        for img_name in images:
-            modified_data = modify_input_for_multiple_files(request,
-                                                            img_name)
-            file_serializer = RequestImageSerializer(data=modified_data)
-            if file_serializer.is_valid():
-                file_serializer.save()
-                arr.append(file_serializer.data)
-            else:
-                flag = 0
-
-        if flag == 1:
-            return Response(arr, status=status.HTTP_201_CREATED)
-        else:
-            return Response(arr, status=status.HTTP_400_BAD_REQUEST)

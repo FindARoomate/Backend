@@ -3,7 +3,6 @@ import json
 import urllib.parse
 
 import cloudinary
-import requests
 from cloudinary.models import CloudinaryField
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -33,6 +32,7 @@ class Profile(BaseClass):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
+    profile_picture = CloudinaryField("image", null=True)
     fullname = models.CharField(max_length=250, blank=True, null=True)
     religion = models.CharField(
         max_length=250, blank=True, choices=Religion.choices, null=True
@@ -63,17 +63,15 @@ class Profile(BaseClass):
     def __str__(self):
         return f"{self.user} Profile"
 
-
-class ProfileImage(BaseClass):
-
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
-    image = CloudinaryField("image")
+    @property
+    def image_url(self):
+        return (
+            f"https://res.cloudinary.com/dczoldewu/{self.profile_picture}"
+        )
 
 
 class RoomateRequest(BaseClass):
-    profile = models.ForeignKey(
-        Profile, on_delete=models.CASCADE
-    )
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     country = models.CharField(max_length=250, null=True)
     state = models.CharField(max_length=250, null=True)
     city = models.CharField(max_length=250, null=True)
@@ -91,8 +89,12 @@ class RoomateRequest(BaseClass):
     additional_cost = models.CharField(max_length=250, null=True)
     listing_title = models.CharField(max_length=250, null=True)
     additional_information = models.CharField(max_length=250, null=True)
-    latitude = models.DecimalField(max_digits=200, decimal_places=10, null=True)
-    longitude = models.DecimalField(max_digits=200, decimal_places=10, null=True)
+    latitude = models.DecimalField(
+        max_digits=200, decimal_places=10, null=True
+    )
+    longitude = models.DecimalField(
+        max_digits=200, decimal_places=10, null=True
+    )
     is_active = models.BooleanField(default=False, null=True)
 
     def __str__(self):
@@ -127,6 +129,7 @@ class RoomateRequest(BaseClass):
         self.longitude = longitude
         super(RoomateRequest, self).save(*args, **kwarg)
 
+
 class RequestImages(BaseClass):
     request = models.ForeignKey(
         RoomateRequest,
@@ -144,4 +147,4 @@ class RequestImages(BaseClass):
 # delete image(s) from cloudinary on model's deletion
 @receiver(pre_delete, sender=RequestImages)
 def photo_delete(sender, instance, **kwargs):
-    cloudinary.uploader.destroy(instance.image_field.public_id)
+    cloudinary.uploader.destroy(instance.image_file.public_id)

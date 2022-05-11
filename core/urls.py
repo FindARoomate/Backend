@@ -8,9 +8,8 @@ from .views import (
     GetOneRoomateRequest,
     GetProfile,
     GetRoomateRequests,
-    RequestImageView,
     UpdateProfile,
-    UploadImage,
+    #UploadImage,
 )
 
 urlpatterns = [
@@ -23,9 +22,9 @@ urlpatterns = [
         name="update-profile",
     ),
     path("profile/get/", GetProfile.as_view(), name="get-profile"),
-    path(
-        "profile/image-upload/", UploadImage.as_view(), name="upload-image"
-    ),
+    # path(
+    #     "profile/image-upload/", UploadImage.as_view(), name="upload-image"
+    # ),
     path(
         "request/create/",
         CreateRoomateRequest.as_view(),
@@ -50,10 +49,5 @@ urlpatterns = [
         "request/deactivate/<str:pk>/",
         DeactivateRequest.as_view(),
         name="deactivate-a-request",
-    ),
-    path(
-        "request/image/upload/",
-        RequestImageView.as_view(),
-        name="request-image",
     ),
 ]
