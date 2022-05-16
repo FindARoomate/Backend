@@ -1,4 +1,5 @@
 import json
+from re import M
 
 import django_filters
 from django.http import JsonResponse
@@ -91,6 +92,7 @@ class RoomateRequestFilter(django_filters.FilterSet):
             "gender",
             "religion",
             "room_type",
+            "is_active",
         ]
 
 
@@ -162,3 +164,46 @@ class ActivateRequest(UpdateAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class GetUserRoomateRequests(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = RoomateRequestSerializer
+    queryset = RoomateRequest.objects.all()
+
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+        roomate_request = RoomateRequest.objects.filter(profile=profile)
+        serializer = RoomateRequestSerializer(roomate_request, many=True)
+
+        return Response(serializer.data)
+
+class GetUserActiveRoomateRequests(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = RoomateRequestSerializer
+    queryset = RoomateRequest.objects.all()
+
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+        roomate_request = RoomateRequest.objects.filter(profile=profile, is_active=True)
+        serializer = RoomateRequestSerializer(roomate_request, many=True)
+
+        return Response(serializer.data)
+
+class GetUserInactiveRoomateRequests(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = RoomateRequestSerializer
+    queryset = RoomateRequest.objects.all()
+
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+        roomate_request = RoomateRequest.objects.filter(profile=profile, is_active=False)
+        serializer = RoomateRequestSerializer(roomate_request, many=True)
+
+        return Response(serializer.data)

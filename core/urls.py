@@ -8,8 +8,10 @@ from .views import (
     GetOneRoomateRequest,
     GetProfile,
     GetRoomateRequests,
+    GetUserActiveRoomateRequests,
+    GetUserInactiveRoomateRequests,
+    GetUserRoomateRequests,
     UpdateProfile,
-    #UploadImage,
 )
 
 urlpatterns = [
@@ -49,5 +51,20 @@ urlpatterns = [
         "request/deactivate/<str:pk>/",
         DeactivateRequest.as_view(),
         name="deactivate-a-request",
+    ),
+    path(
+        "request/users/",
+        GetUserRoomateRequests.as_view(),
+        name="get-user-requests",
+    ),
+    path(
+        "request/users/active/",
+        GetUserActiveRoomateRequests.as_view(),
+        name="get-user-active-requests",
+    ),
+    path(
+        "request/users/inactive/",
+        GetUserInactiveRoomateRequests.as_view(),
+        name="get-user-inactive-requests",
     ),
 ]
