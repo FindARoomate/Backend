@@ -18,3 +18,9 @@ class Religion(TextChoices):
     ISLAM = "ISLAM"
     CHRISTIANITY = "CHRISTIANITY"
     OTHERS = "I_DON'T_MIND"
+
+class ConnectionStatus(TextChoices):
+
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"

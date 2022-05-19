@@ -11,7 +11,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
-from .enums import Gender, Personality, Religion
+from .enums import ConnectionStatus, Gender, Personality, Religion
 
 
 class BaseClass(models.Model):
@@ -71,7 +71,7 @@ class Profile(BaseClass):
 
 
 class RoomateRequest(BaseClass):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='roomate_request')
     country = models.CharField(max_length=250, null=True)
     state = models.CharField(max_length=250, null=True)
     city = models.CharField(max_length=250, null=True)
@@ -80,7 +80,7 @@ class RoomateRequest(BaseClass):
     no_of_persons = models.IntegerField(null=True)
     no_of_current_roomies = models.IntegerField(null=True)
     amenities = ArrayField(
-        models.CharField(max_length=250, null=True), size=12
+        models.CharField(max_length=250, null=True), size=12, null=True
     )
     date_to_move = models.DateTimeField(default=timezone.now, null=True)
     rent_per_person = models.DecimalField(
@@ -148,3 +148,12 @@ class RequestImages(BaseClass):
 @receiver(pre_delete, sender=RequestImages)
 def photo_delete(sender, instance, **kwargs):
     cloudinary.uploader.destroy(instance.image_file.public_id)
+
+class Connection(BaseClass):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='connection'
+    )
+    roomate_request =  models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='connections'
+    )
+    status = models.CharField(max_length=100, choices=ConnectionStatus.choices, default=ConnectionStatus.PENDING)
