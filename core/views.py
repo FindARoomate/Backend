@@ -1,7 +1,5 @@
-import json
-from re import M
-
 import django_filters
+from authentify.models import CustomUser
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import (
@@ -16,11 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Profile, RoomateRequest
-from .serializers import (
-    ProfileSerializer,
-    RequestImageSerializer,
-    RoomateRequestSerializer,
-)
+from .serializers import ProfileSerializer, RoomateRequestSerializer
 
 
 class CreateProfile(CreateAPIView):
@@ -54,7 +48,7 @@ class UpdateProfile(UpdateAPIView):
         instance = self.get_object()
 
         serializer = self.get_serializer(
-            instance, data=request.data, context={"request": request}
+            instance, data=request.data, context={"request": request}, partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -64,11 +58,11 @@ class UpdateProfile(UpdateAPIView):
 
 class GetProfile(APIView):
     def get(self, request):
-
+        email = request.user.email
         profile = Profile.objects.get(user=request.user)
         data = ProfileSerializer(profile).data
 
-        return Response(data)
+        return Response({"email":email, "data": data})
 
 
 class CreateRoomateRequest(CreateAPIView):
@@ -92,6 +86,7 @@ class RoomateRequestFilter(django_filters.FilterSet):
             "gender",
             "religion",
             "room_type",
+            "listing_title",
             "is_active",
         ]
 

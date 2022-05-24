@@ -32,33 +32,33 @@ class Profile(BaseClass):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
-    profile_picture = CloudinaryField("image", null=True)
-    fullname = models.CharField(max_length=250, blank=True, null=True)
+    profile_picture = CloudinaryField("image",)
+    fullname = models.CharField(max_length=250, blank=True, )
     religion = models.CharField(
-        max_length=250, blank=True, choices=Religion.choices, null=True
+        max_length=250, blank=True, choices=Religion.choices, 
     )
     gender = models.CharField(
-        max_length=250, blank=True, choices=Gender.choices, null=True
+        max_length=250, blank=True, choices=Gender.choices, 
     )
-    phone_number = models.CharField(max_length=23, null=True)
+    phone_number = models.CharField(max_length=23, )
     date_of_birth = models.DateTimeField(default=timezone.now)
     personality = models.CharField(
-        max_length=250, choices=Personality.choices, null=True
+        max_length=250, choices=Personality.choices,
     )
-    profession = models.CharField(max_length=250, null=True)
-    bio = models.TextField(max_length=250, null=True)
-    age_range = models.CharField(max_length=250, null=True)
+    profession = models.CharField(max_length=250,)
+    bio = models.TextField(max_length=250, )
+    age_range = models.CharField(max_length=250, )
     roomie_gender = models.CharField(
-        max_length=250, choices=Gender.choices, null=True
+        max_length=250, choices=Gender.choices, 
     )
     roomie_religion = models.CharField(
-        max_length=250, choices=Religion.choices, null=True
+        max_length=250, choices=Religion.choices, 
     )
     roomie_personality = models.CharField(
-        max_length=250, choices=Personality.choices, null=True
+        max_length=250, choices=Personality.choices, 
     )
     roomie_age = models.IntegerField(null=True)
-    roomate_description = models.TextField(max_length=250, null=True)
+    roomate_description = models.TextField(max_length=250, )
 
     def __str__(self):
         return f"{self.user} Profile"
@@ -72,30 +72,30 @@ class Profile(BaseClass):
 
 class RoomateRequest(BaseClass):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='roomate_request')
-    country = models.CharField(max_length=250, null=True)
-    state = models.CharField(max_length=250, null=True)
-    city = models.CharField(max_length=250, null=True)
-    street_address = models.CharField(max_length=250, null=True)
-    room_type = models.CharField(max_length=250, null=True)
-    no_of_persons = models.IntegerField(null=True)
-    no_of_current_roomies = models.IntegerField(null=True)
+    country = models.CharField(max_length=250,)
+    state = models.CharField(max_length=250,)
+    city = models.CharField(max_length=250,)
+    street_address = models.CharField(max_length=250,)
+    room_type = models.CharField(max_length=250,)
+    no_of_persons = models.IntegerField()
+    no_of_current_roomies = models.IntegerField()
     amenities = ArrayField(
-        models.CharField(max_length=250, null=True), size=12, null=True
+        models.CharField(max_length=250), size=12,
     )
-    date_to_move = models.DateTimeField(default=timezone.now, null=True)
+    date_to_move = models.DateTimeField(default=timezone.now,)
     rent_per_person = models.DecimalField(
-        max_digits=100, decimal_places=2, null=True
+        max_digits=100, decimal_places=2, 
     )
-    additional_cost = models.CharField(max_length=250, null=True)
-    listing_title = models.CharField(max_length=250, null=True)
-    additional_information = models.CharField(max_length=250, null=True)
+    additional_cost = models.CharField(max_length=250)
+    listing_title = models.CharField(max_length=250)
+    additional_information = models.CharField(max_length=250)
     latitude = models.DecimalField(
-        max_digits=200, decimal_places=10, null=True
+        max_digits=200, decimal_places=10,
     )
     longitude = models.DecimalField(
-        max_digits=200, decimal_places=10, null=True
+        max_digits=200, decimal_places=10,
     )
-    is_active = models.BooleanField(default=False, null=True)
+    is_active = models.BooleanField(default=False,)
 
     def __str__(self):
         return f"{self.profile} Request"

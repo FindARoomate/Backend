@@ -17,6 +17,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+    last_login = models.DateTimeField(null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

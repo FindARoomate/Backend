@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -21,13 +23,17 @@ class WaitlistSerializer(serializers.ModelSerializer):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-
+        user = CustomUser.objects.get(id=self.user.id)
         refresh = self.get_token(self.user)
-
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
-        data["data"] = {"id": self.user.id, "email": self.user.email}
-
+        data["data"] = {
+            "id": self.user.id,
+            "email": self.user.email,
+            "last_login": self.user.last_login,
+        }
+        user.last_login = datetime.now()
+        user.save()
         return data
 
 
@@ -46,6 +52,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "confirm_password",
+            "last_login",
         ]
 
     def validate(self, data):

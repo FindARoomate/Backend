@@ -4,7 +4,6 @@ from rest_framework.exceptions import ValidationError
 
 from .models import Profile, RequestImages, RoomateRequest
 
-
 # class ImageSerializer(serializers.ModelSerializer):
 #     image_url = serializers.ReadOnlyField()
 
@@ -43,6 +42,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {"created_at": {"read_only": True}}
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop('profile_picture')
+
+        return representation
+
     def create(self, validated_data):
         current_user = self.context["request"].user
         user = CustomUser.objects.get(email__iexact=current_user.email)
@@ -64,13 +69,16 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.gender = validated_data["gender"]
         instance.phone_number = validated_data["phone_number"]
         instance.personality = validated_data["personality"]
-        # instance.date_of_birth = validated_data["date_of_birth"]
+        #instance.date_of_birth = validated_data["date_of_birth"]
         instance.profession = validated_data["profession"]
         instance.bio = validated_data["bio"]
         instance.roomate_description = validated_data[
             "roomate_description"
         ]
-        instance.age = validated_data["age"]
+        instance.roomie_age = validated_data["roomie_age"]
+        instance.roomie_religion = validated_data["roomie_religion"]
+        instance.roomie_gender = validated_data["roomie_gender"]
+        instance.roomie_personality = validated_data["roomie_personality"]
 
         instance.save()
 
