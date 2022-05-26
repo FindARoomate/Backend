@@ -1,3 +1,5 @@
+from tkinter import E
+
 import django_filters
 from authentify.models import CustomUser
 from django.http import JsonResponse
@@ -112,24 +114,31 @@ class DeactivateRequest(UpdateAPIView):
     queryset = RoomateRequest.objects.all()
 
     def patch(self, request, pk, *args, **kwargs):
-        roomate_request = RoomateRequest.objects.get(id=pk)
+        profile = Profile.objects.get(user=request.user)
+        try:
+            roomate_request = RoomateRequest.objects.get(id=pk, profile=profile)
 
-        serializer = self.get_serializer(
-            roomate_request,
-            data=request.data,
-            context={"request": request},
-            partial=True,
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+            serializer = self.get_serializer(
+                roomate_request,
+                data=request.data,
+                context={"request": request},
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-        return Response(
-            {
-                "detail": "request deactivated successfully",
-                "data": serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
+            return Response(
+                {
+                    "detail": "request deactivated successfully",
+                    "data": serializer.data,
+                },
+                status=status.HTTP_200_OK,)
+        except Exception as e:
+            print(e)
+            return Response(
+                {"detail":"You do not have permission to edit request"}
+            )
+
 
 
 class ActivateRequest(UpdateAPIView):
@@ -141,25 +150,30 @@ class ActivateRequest(UpdateAPIView):
     queryset = RoomateRequest.objects.all()
 
     def patch(self, request, pk, *args, **kwargs):
-        roomate_request = RoomateRequest.objects.get(id=pk)
+        profile = Profile.objects.get(user=request.user)
+        try:
+            roomate_request = RoomateRequest.objects.get(id=pk, profile=profile)
 
-        serializer = self.get_serializer(
-            roomate_request,
-            data=request.data,
-            context={"request": request},
-            partial=True,
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+            serializer = self.get_serializer(
+                roomate_request,
+                data=request.data,
+                context={"request": request},
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-        return Response(
-            {
-                "detail": "request activated successfully",
-                "data": serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
-
+            return Response(
+                {
+                    "detail": "request activated successfully",
+                    "data": serializer.data,
+                },
+                status=status.HTTP_200_OK,)
+        except Exception as e:
+            print(e)
+            return Response(
+                {"detail":"You do not have permission to edit request"}
+            )
 
 class GetUserRoomateRequests(APIView):
     permission_classes = [

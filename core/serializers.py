@@ -16,7 +16,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     image_url = serializers.ReadOnlyField()
 
-
     class Meta:
         model = Profile
         fields = [
@@ -44,7 +43,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation.pop('profile_picture')
+        representation.pop("profile_picture")
 
         return representation
 
@@ -69,7 +68,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.gender = validated_data["gender"]
         instance.phone_number = validated_data["phone_number"]
         instance.personality = validated_data["personality"]
-        #instance.date_of_birth = validated_data["date_of_birth"]
+        instance.date_of_birth = validated_data["date_of_birth"]
         instance.profession = validated_data["profession"]
         instance.bio = validated_data["bio"]
         instance.roomate_description = validated_data[
@@ -143,6 +142,7 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
                 profile=profile, **validated_data
             )
             roomate_request.is_active = True
+            roomate_request.save()
 
             for image_data in images_data.getlist("request_images"):
                 RequestImages.objects.create(
