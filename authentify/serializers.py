@@ -1,10 +1,8 @@
-from datetime import datetime
-
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from django.utils import timezone
 from .models import CustomUser, Waitlist
 from .utils import is_valid_email
 
@@ -32,7 +30,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             "email": self.user.email,
             "last_login": self.user.last_login,
         }
-        user.last_login = datetime.now()
+        user.last_login = timezone.now()
         user.save()
         return data
 
