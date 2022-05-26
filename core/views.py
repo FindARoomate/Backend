@@ -1,8 +1,4 @@
-from tkinter import E
-
 import django_filters
-from authentify.models import CustomUser
-from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -10,7 +6,7 @@ from rest_framework.generics import (
     RetrieveAPIView,
     UpdateAPIView,
 )
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
