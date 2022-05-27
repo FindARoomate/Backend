@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     ActivateRequest,
+    CreateConnection,
     CreateProfile,
     CreateRoomateRequest,
     DeactivateRequest,
@@ -67,4 +68,7 @@ urlpatterns = [
         GetUserInactiveRoomateRequests.as_view(),
         name="get-user-inactive-requests",
     ),
+    path(
+        "connections/create/", CreateConnection.as_view(), name="create-connection"
+    )
 ]

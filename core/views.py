@@ -11,8 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Profile, RoomateRequest
-from .serializers import ProfileSerializer, RoomateRequestSerializer
+from .models import Connection, Profile, RoomateRequest
+from .serializers import ProfileSerializer, RoomateRequestSerializer, ConnectionSerializer
 
 
 class CreateProfile(CreateAPIView):
@@ -212,3 +212,17 @@ class GetUserInactiveRoomateRequests(APIView):
         serializer = RoomateRequestSerializer(roomate_request, many=True)
 
         return Response(serializer.data)
+
+class CreateConnection(CreateAPIView):
+
+    serializer_class = ConnectionSerializer
+    #parser_classes = (MultiPartParser,)
+    permission_classes = [IsAuthenticated]
+    queryset = Connection
+
+class AcceptConnection(APIView):
+
+    serializer_class = ConnectionSerializer
+    #parser_classes = (MultiPartParser,)
+    permission_classes = [IsAuthenticated]
+    queryset = Connection

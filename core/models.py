@@ -198,7 +198,7 @@ class Connection(BaseClass):
         related_name="connection",
     )
     roomate_request = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        RoomateRequest,
         on_delete=models.CASCADE,
         related_name="connections",
     )

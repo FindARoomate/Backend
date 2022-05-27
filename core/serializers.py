@@ -2,7 +2,7 @@ from authentify.models import CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Profile, RequestImages, RoomateRequest
+from .models import Profile, RequestImages, RoomateRequest, Connection
 
 # class ImageSerializer(serializers.ModelSerializer):
 #     image_url = serializers.ReadOnlyField()
@@ -154,3 +154,8 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
             return serializers.ValidationError(
                 detail="no profile created for the logged in user"
             )
+
+class ConnectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Connection
+        fields = '__all__'
