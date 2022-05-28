@@ -12,7 +12,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Connection, Profile, RoomateRequest
-from .serializers import ProfileSerializer, RoomateRequestSerializer, ConnectionSerializer
+from .serializers import (
+    ConnectionSerializer,
+    ProfileSerializer,
+    RoomateRequestSerializer,
+)
 
 
 class CreateProfile(CreateAPIView):
@@ -226,3 +230,53 @@ class AcceptConnection(APIView):
     #parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated]
     queryset = Connection
+
+class AcceptConnection(UpdateAPIView):
+
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = ConnectionSerializer
+    queryset = Connection.objects.all()
+
+    def patch(self, request, pk, *args, **kwargs):
+        connection = Connection.objects.get(id=pk)
+        serializer = self.get_serializer(
+            connection,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "detail": "connection accepted successfully",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,)
+
+class RejectConnection(UpdateAPIView):
+
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = ConnectionSerializer
+    queryset = Connection.objects.all()
+
+    def patch(self, request, pk, *args, **kwargs):
+        connection = Connection.objects.get(id=pk)
+        serializer = self.get_serializer(
+            connection,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "detail": "connection rejected successfully",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,)

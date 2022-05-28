@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    AcceptConnection,
     ActivateRequest,
     CreateConnection,
     CreateProfile,
@@ -13,6 +14,7 @@ from .views import (
     GetUserInactiveRoomateRequests,
     GetUserRoomateRequests,
     UpdateProfile,
+    RejectConnection,
 )
 
 urlpatterns = [
@@ -70,5 +72,16 @@ urlpatterns = [
     ),
     path(
         "connections/create/", CreateConnection.as_view(), name="create-connection"
-    )
+    ),
+    path(
+        "connections/accept/<str:pk>/",
+        AcceptConnection.as_view(),
+        name="accept-connection",
+    ),
+    path(
+        "connections/reject/<str:pk>/",
+        RejectConnection.as_view(),
+        name="accept-connection",
+    ),
 ]
+
