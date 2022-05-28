@@ -50,7 +50,10 @@ class UpdateProfile(UpdateAPIView):
         instance = self.get_object()
 
         serializer = self.get_serializer(
-            instance, data=request.data, context={"request": request}, partial=True
+            instance,
+            data=request.data,
+            context={"request": request},
+            partial=True,
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -64,7 +67,7 @@ class GetProfile(APIView):
         profile = Profile.objects.get(user=request.user)
         data = ProfileSerializer(profile).data
 
-        return Response({"email":email, "data": data})
+        return Response({"email": email, "data": data})
 
 
 class CreateRoomateRequest(CreateAPIView):
@@ -116,7 +119,9 @@ class DeactivateRequest(UpdateAPIView):
     def patch(self, request, pk, *args, **kwargs):
         profile = Profile.objects.get(user=request.user)
         try:
-            roomate_request = RoomateRequest.objects.get(id=pk, profile=profile)
+            roomate_request = RoomateRequest.objects.get(
+                id=pk, profile=profile
+            )
 
             serializer = self.get_serializer(
                 roomate_request,
@@ -132,13 +137,13 @@ class DeactivateRequest(UpdateAPIView):
                     "detail": "request deactivated successfully",
                     "data": serializer.data,
                 },
-                status=status.HTTP_200_OK,)
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             print(e)
             return Response(
-                {"detail":"You do not have permission to edit request"}
+                {"detail": "You do not have permission to edit request"}
             )
-
 
 
 class ActivateRequest(UpdateAPIView):
@@ -152,7 +157,9 @@ class ActivateRequest(UpdateAPIView):
     def patch(self, request, pk, *args, **kwargs):
         profile = Profile.objects.get(user=request.user)
         try:
-            roomate_request = RoomateRequest.objects.get(id=pk, profile=profile)
+            roomate_request = RoomateRequest.objects.get(
+                id=pk, profile=profile
+            )
 
             serializer = self.get_serializer(
                 roomate_request,
@@ -168,12 +175,14 @@ class ActivateRequest(UpdateAPIView):
                     "detail": "request activated successfully",
                     "data": serializer.data,
                 },
-                status=status.HTTP_200_OK,)
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             print(e)
             return Response(
-                {"detail":"You do not have permission to edit request"}
+                {"detail": "You do not have permission to edit request"}
             )
+
 
 class GetUserRoomateRequests(APIView):
     permission_classes = [
@@ -189,6 +198,7 @@ class GetUserRoomateRequests(APIView):
 
         return Response(serializer.data)
 
+
 class GetUserActiveRoomateRequests(APIView):
     permission_classes = [
         IsAuthenticated,
@@ -198,10 +208,13 @@ class GetUserActiveRoomateRequests(APIView):
 
     def get(self, request):
         profile = Profile.objects.get(user=request.user)
-        roomate_request = RoomateRequest.objects.filter(profile=profile, is_active=True)
+        roomate_request = RoomateRequest.objects.filter(
+            profile=profile, is_active=True
+        )
         serializer = RoomateRequestSerializer(roomate_request, many=True)
 
         return Response(serializer.data)
+
 
 class GetUserInactiveRoomateRequests(APIView):
     permission_classes = [
@@ -212,24 +225,29 @@ class GetUserInactiveRoomateRequests(APIView):
 
     def get(self, request):
         profile = Profile.objects.get(user=request.user)
-        roomate_request = RoomateRequest.objects.filter(profile=profile, is_active=False)
+        roomate_request = RoomateRequest.objects.filter(
+            profile=profile, is_active=False
+        )
         serializer = RoomateRequestSerializer(roomate_request, many=True)
 
         return Response(serializer.data)
 
+
 class CreateConnection(CreateAPIView):
 
     serializer_class = ConnectionSerializer
-    #parser_classes = (MultiPartParser,)
+    # parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated]
     queryset = Connection
+
 
 class AcceptConnection(APIView):
 
     serializer_class = ConnectionSerializer
-    #parser_classes = (MultiPartParser,)
+    # parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated]
     queryset = Connection
+
 
 class AcceptConnection(UpdateAPIView):
 
@@ -241,6 +259,7 @@ class AcceptConnection(UpdateAPIView):
 
     def patch(self, request, pk, *args, **kwargs):
         connection = Connection.objects.get(id=pk)
+
         serializer = self.get_serializer(
             connection,
             data=request.data,
@@ -248,13 +267,20 @@ class AcceptConnection(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        request = RoomateRequest.objects.get(
+            id=serializer.data["roomate_request"]
+        )
+        request_serializer = RoomateRequestSerializer(request)
 
         return Response(
             {
                 "detail": "connection accepted successfully",
                 "data": serializer.data,
+                "request_data": request_serializer.data,
             },
-            status=status.HTTP_200_OK,)
+            status=status.HTTP_200_OK,
+        )
+
 
 class RejectConnection(UpdateAPIView):
 
@@ -266,6 +292,7 @@ class RejectConnection(UpdateAPIView):
 
     def patch(self, request, pk, *args, **kwargs):
         connection = Connection.objects.get(id=pk)
+
         serializer = self.get_serializer(
             connection,
             data=request.data,
@@ -273,10 +300,16 @@ class RejectConnection(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        request = RoomateRequest.objects.get(
+            id=serializer.data["roomate_request"]
+        )
+        request_serializer = RoomateRequestSerializer(request)
 
         return Response(
             {
                 "detail": "connection rejected successfully",
                 "data": serializer.data,
+                "request_data": request_serializer.data,
             },
-            status=status.HTTP_200_OK,)
+            status=status.HTTP_200_OK,
+        )
