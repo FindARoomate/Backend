@@ -192,12 +192,12 @@ def photo_delete(sender, instance, **kwargs):
 
 
 class Connection(BaseClass):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="connection",
     )
-    roomate_request = models.OneToOneField(
+    roomate_request = models.ForeignKey(
         RoomateRequest,
         on_delete=models.CASCADE,
         related_name="connections",

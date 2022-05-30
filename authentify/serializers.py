@@ -1,8 +1,11 @@
+from core.models import Profile
+from core.serializers import ProfileSerializer
 from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.utils import timezone
+
 from .models import CustomUser, Waitlist
 from .utils import is_valid_email
 
@@ -22,6 +25,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         user = CustomUser.objects.get(id=self.user.id)
+        try:
+            profile = Profile.objects.get(user=user)
+            profile_serializer = ProfileSerializer(profile)
+            profile_data = profile_serializer.data
+        except Profile.DoesNotExist:
+            profile_data = []
         refresh = self.get_token(self.user)
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
@@ -29,6 +38,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             "id": self.user.id,
             "email": self.user.email,
             "last_login": self.user.last_login,
+            "profile_data": profile_data,
         }
         user.last_login = timezone.now()
         user.save()
