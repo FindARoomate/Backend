@@ -9,12 +9,15 @@ from .views import (
     DeactivateRequest,
     GetOneRoomateRequest,
     GetProfile,
+    GetReceivedRequests,
     GetRoomateRequests,
+    GetSentRequests,
     GetUserActiveRoomateRequests,
     GetUserInactiveRoomateRequests,
     GetUserRoomateRequests,
-    UpdateProfile,
     RejectConnection,
+    RequestStatistics,
+    UpdateProfile,
 )
 
 urlpatterns = [
@@ -83,5 +86,21 @@ urlpatterns = [
         RejectConnection.as_view(),
         name="accept-connection",
     ),
+    path(
+        "connections/sent/",
+        GetSentRequests.as_view(),
+        name="sent-connections",
+    ),
+    path(
+        "connections/recieved/",
+        GetReceivedRequests.as_view(),
+        name="sent-connections",
+    ),
+    path(
+        "statistics/",
+        RequestStatistics.as_view(),
+        name="request-statistics",
+    )
+    
 ]
 

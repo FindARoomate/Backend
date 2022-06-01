@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .enums import ConnectionStatus
 from .models import Connection, Profile, RoomateRequest
 from .serializers import (
     ConnectionSerializer,
@@ -313,3 +314,97 @@ class RejectConnection(UpdateAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class GetSentRequests(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = ConnectionSerializer
+    queryset = Connection.objects.all()
+
+    def get(self, request):
+        user = request.user
+        pending = Connection.objects.filter(
+            sender=user, status=ConnectionStatus.PENDING
+        )
+        accepted = Connection.objects.filter(
+            sender=user, status=ConnectionStatus.ACCEPTED
+        )
+        rejected = Connection.objects.filter(
+            sender=user, status=ConnectionStatus.REJECTED
+        )
+
+        pending_data = self.serializer_class(pending, many=True)
+        accepted_data = self.serializer_class(accepted, many=True)
+        rejected_data = self.serializer_class(rejected, many=True)
+
+        return Response(
+            {
+                "pending_requests": pending_data.data,
+                "accepted_requests": accepted_data.data,
+                "rejected_request": rejected_data.data,
+            }
+        )
+
+
+class GetReceivedRequests(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = ConnectionSerializer
+    queryset = Connection.objects.all()
+
+    def get(self, request):
+        user = request.user
+        pending = Connection.objects.filter(
+            reciever=user, status=ConnectionStatus.PENDING
+        )
+        accepted = Connection.objects.filter(
+            reciever=user, status=ConnectionStatus.ACCEPTED
+        )
+        rejected = Connection.objects.filter(
+            reciever=user, status=ConnectionStatus.REJECTED
+        )
+
+        pending_data = self.serializer_class(pending, many=True)
+        accepted_data = self.serializer_class(accepted, many=True)
+        rejected_data = self.serializer_class(rejected, many=True)
+
+        return Response(
+            {
+                "pending_requests": pending_data.data,
+                "accepted_requests": accepted_data.data,
+                "rejected_request": rejected_data.data,
+            }
+        )
+
+class RequestStatistics(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    
+    def get(self, request):
+        user = request.user
+        profile = Profile.objects.get(user=user)
+        active_request = RoomateRequest.objects.filter(
+            profile=profile, is_active=True
+        ).count()
+        inactive_request = RoomateRequest.objects.filter(
+            profile=profile, is_active=False
+        ).count()
+        connection_sent = Connection.objects.filter(
+            sender=user
+        ).count()
+        connection_recieved = Connection.objects.filter(
+            reciever=user
+        ).count()
+
+        response = {
+            "active_requests": active_request,
+            "inactive_requests": inactive_request,
+            "connections_sent": connection_sent,
+            "connections_recieved": connection_recieved
+        }
+
+        return Response(response)

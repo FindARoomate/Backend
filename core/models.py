@@ -192,10 +192,17 @@ def photo_delete(sender, instance, **kwargs):
 
 
 class Connection(BaseClass):
-    user = models.ForeignKey(
+    sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="connection",
+        related_name="sender",
+        default=None,
+    )
+    reciever = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reciever",
+        default=None,
     )
     roomate_request = models.ForeignKey(
         RoomateRequest,

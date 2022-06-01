@@ -2,7 +2,7 @@ from authentify.models import CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Profile, RequestImages, RoomateRequest, Connection
+from .models import Connection, Profile, RequestImages, RoomateRequest
 
 # class ImageSerializer(serializers.ModelSerializer):
 #     image_url = serializers.ReadOnlyField()
@@ -155,7 +155,46 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
                 detail="no profile created for the logged in user"
             )
 
+
 class ConnectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Connection
-        fields = '__all__'
+        fields = [
+            "id",
+            "sender",
+            "reciever",
+            "roomate_request",
+            "status",
+            "created_at",
+        ]
+        extra_kwargs = {
+            "sender": {"read_only": True},
+            "reciever": {"read_only": True},
+        }
+
+    def create(self, validated_data):
+
+        sender = self.context["request"].user
+        roomate_request = self.validated_data["roomate_request"]
+        request = RoomateRequest.objects.get(id=roomate_request.id)
+        reciever = CustomUser.objects.get(id=request.profile.user.id)
+
+        if Connection.objects.filter(
+            sender=sender, roomate_request=roomate_request
+        ).exists():
+            raise ValidationError(
+                {
+                    "detail": "You have sent a connection to this request already"
+                }
+            )
+
+        if sender.id == reciever.id:
+            raise ValidationError(
+                {"error": "You can't send connection to yourself"}
+            )
+        else:
+            connection = Connection.objects.create(
+                sender=sender, reciever=reciever, **validated_data
+            )
+
+        return connection
