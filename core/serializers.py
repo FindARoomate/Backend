@@ -157,6 +157,9 @@ class RoomateRequestSerializer(serializers.ModelSerializer):
 
 
 class ConnectionSerializer(serializers.ModelSerializer):
+    roomate_request = RoomateRequestSerializer(read_only=True)
+    request_id = serializers.IntegerField(write_only=True)
+
     class Meta:
         model = Connection
         fields = [
@@ -164,6 +167,7 @@ class ConnectionSerializer(serializers.ModelSerializer):
             "sender",
             "reciever",
             "roomate_request",
+            "request_id",
             "status",
             "created_at",
         ]
@@ -175,9 +179,11 @@ class ConnectionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
 
         sender = self.context["request"].user
-        roomate_request = self.validated_data["roomate_request"]
-        request = RoomateRequest.objects.get(id=roomate_request.id)
-        reciever = CustomUser.objects.get(id=request.profile.user.id)
+        request_id = self.validated_data["request_id"]
+        roomate_request = RoomateRequest.objects.get(id=request_id)
+        reciever = CustomUser.objects.get(
+            id=roomate_request.profile.user.id
+        )
 
         if Connection.objects.filter(
             sender=sender, roomate_request=roomate_request
@@ -194,7 +200,8 @@ class ConnectionSerializer(serializers.ModelSerializer):
             )
         else:
             connection = Connection.objects.create(
-                sender=sender, reciever=reciever, **validated_data
+                sender=sender,
+                reciever=reciever,
+                roomate_request=roomate_request,
             )
-
         return connection
