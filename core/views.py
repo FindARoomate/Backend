@@ -268,10 +268,6 @@ class AcceptConnection(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # request = RoomateRequest.objects.get(
-        #     id=serializer.data["roomate_request"]["id"]
-        # )
-        # request_serializer = RoomateRequestSerializer(request)
 
         return Response(
             {
@@ -300,11 +296,7 @@ class RejectConnection(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # request = RoomateRequest.objects.get(
-        #     id=serializer.data["roomate_request"]
-        # )
-        # request_serializer = RoomateRequestSerializer(request)
-
+      
         return Response(
             {
                 "detail": "connection rejected successfully",
