@@ -30,6 +30,7 @@ urlpatterns = [
         name="resend_activate",
     ),
     path("login/", MyTokenObtainPairView.as_view(), name="login"),
+    path("refresh/", TokenRefreshView.as_view(), name="refresh"),
     path(
         "reset-password/", ResetPassword.as_view(), name="reset-password"
     ),

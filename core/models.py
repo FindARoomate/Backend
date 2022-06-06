@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from .enums import ConnectionStatus, Gender, Personality, Religion
-
+from .managers import SoftDeletionManager
 
 class BaseClass(models.Model):
     """
@@ -26,6 +26,28 @@ class BaseClass(models.Model):
         abstract = True
         get_latest_by = "updated_at"
         ordering = ("-updated_at", "-created_at")
+
+class SoftDeleteBaseModel(models.Model):
+
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+    objects = SoftDeletionManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        abstract = True
+
+    def delete(self, hard=False):
+        if hard:
+            super(SoftDeleteBaseModel, self).delete()
+        else:
+            self.deleted_at = timezone.now()
+            self.save()
+
+    def restore(self):
+        self.deleted_at = None
+        self.save()
+
 
 
 class Profile(BaseClass):
@@ -191,7 +213,7 @@ def photo_delete(sender, instance, **kwargs):
     cloudinary.uploader.destroy(instance.image_file.public_id)
 
 
-class Connection(BaseClass):
+class Connection(BaseClass, SoftDeleteBaseModel):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

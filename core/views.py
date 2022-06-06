@@ -2,6 +2,7 @@ import django_filters
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
+    DestroyAPIView,
     ListAPIView,
     RetrieveAPIView,
     UpdateAPIView,
@@ -46,7 +47,7 @@ class UpdateProfile(UpdateAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
 
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
 
         instance = self.get_object()
 
@@ -77,6 +78,30 @@ class CreateRoomateRequest(CreateAPIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser,)
     queryset = RoomateRequest.objects.all()
+
+
+class UpdateRoomateRequest(UpdateAPIView):
+
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = RoomateRequestSerializer
+    queryset = RoomateRequest.objects.all()
+
+    def patch(self, request, *args, **kwargs):
+
+        instance = self.get_object()
+
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            context={"request": request},
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RoomateRequestFilter(django_filters.FilterSet):
@@ -242,12 +267,12 @@ class CreateConnection(CreateAPIView):
     queryset = Connection
 
 
-class AcceptConnection(APIView):
+# class AcceptConnection(APIView):
 
-    serializer_class = ConnectionSerializer
-    # parser_classes = (MultiPartParser,)
-    permission_classes = [IsAuthenticated]
-    queryset = Connection
+#     serializer_class = ConnectionSerializer
+#     # parser_classes = (MultiPartParser,)
+#     permission_classes = [IsAuthenticated]
+#     queryset = Connection
 
 
 class AcceptConnection(UpdateAPIView):
@@ -296,7 +321,7 @@ class RejectConnection(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-      
+
         return Response(
             {
                 "detail": "connection rejected successfully",
@@ -304,6 +329,18 @@ class RejectConnection(UpdateAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class CancelConnection(DestroyAPIView):
+
+    serializer_class = ConnectionSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Connection.objects.all()
+
+    def delete(self, request, pk, format=None):
+        connection = self.get_object()
+        connection.delete()
+        return Response({"message":"Connection deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class GetSentRequests(APIView):
@@ -369,11 +406,12 @@ class GetReceivedRequests(APIView):
             }
         )
 
+
 class RequestStatistics(APIView):
     permission_classes = [
         IsAuthenticated,
     ]
-    
+
     def get(self, request):
         user = request.user
         profile = Profile.objects.get(user=user)
@@ -383,9 +421,7 @@ class RequestStatistics(APIView):
         inactive_request = RoomateRequest.objects.filter(
             profile=profile, is_active=False
         ).count()
-        connection_sent = Connection.objects.filter(
-            sender=user
-        ).count()
+        connection_sent = Connection.objects.filter(sender=user).count()
         connection_recieved = Connection.objects.filter(
             reciever=user
         ).count()
@@ -394,7 +430,7 @@ class RequestStatistics(APIView):
             "active_requests": active_request,
             "inactive_requests": inactive_request,
             "connections_sent": connection_sent,
-            "connections_recieved": connection_recieved
+            "connections_recieved": connection_recieved,
         }
 
         return Response(response)

@@ -34,6 +34,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         refresh = self.get_token(self.user)
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
+        data["request_lifetime"] = "20 minutes"
         data["data"] = {
             "id": self.user.id,
             "email": self.user.email,

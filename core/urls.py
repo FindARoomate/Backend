@@ -18,6 +18,8 @@ from .views import (
     RejectConnection,
     RequestStatistics,
     UpdateProfile,
+    UpdateRoomateRequest,
+    CancelConnection,
 )
 
 urlpatterns = [
@@ -30,13 +32,15 @@ urlpatterns = [
         name="update-profile",
     ),
     path("profile/get/", GetProfile.as_view(), name="get-profile"),
-    # path(
-    #     "profile/image-upload/", UploadImage.as_view(), name="upload-image"
-    # ),
     path(
         "request/create/",
         CreateRoomateRequest.as_view(),
         name="create-roomate-request",
+    ),
+    path(
+        "request/<str:pk>/update/",
+        UpdateRoomateRequest.as_view(),
+        name="update-roomate-request",
     ),
     path(
         "request/get/",
@@ -85,6 +89,11 @@ urlpatterns = [
         "connections/reject/<str:pk>/",
         RejectConnection.as_view(),
         name="accept-connection",
+    ),
+    path(
+        "connections/<str:pk>/delete/",
+        CancelConnection.as_view(),
+        name="delete-connection",
     ),
     path(
         "connections/sent/",
