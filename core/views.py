@@ -338,9 +338,20 @@ class CancelConnection(DestroyAPIView):
     queryset = Connection.objects.all()
 
     def delete(self, request, pk, format=None):
-        connection = self.get_object()
-        connection.delete()
-        return Response({"message":"Connection deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        try:
+            connection = Connection.objects.get(id=pk, sender=request.user)
+            connection.delete()
+            return Response(
+                {"message": "Connection deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+
+        except Exception as e:
+            print(e)
+            return Response(
+                {"detail": "You can't cancel this connection"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class GetSentRequests(APIView):

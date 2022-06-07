@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     AcceptConnection,
     ActivateRequest,
+    CancelConnection,
     CreateConnection,
     CreateProfile,
     CreateRoomateRequest,
@@ -19,7 +20,6 @@ from .views import (
     RequestStatistics,
     UpdateProfile,
     UpdateRoomateRequest,
-    CancelConnection,
 )
 
 urlpatterns = [
@@ -78,7 +78,9 @@ urlpatterns = [
         name="get-user-inactive-requests",
     ),
     path(
-        "connections/create/", CreateConnection.as_view(), name="create-connection"
+        "connections/create/",
+        CreateConnection.as_view(),
+        name="create-connection",
     ),
     path(
         "connections/accept/<str:pk>/",
@@ -109,7 +111,5 @@ urlpatterns = [
         "statistics/",
         RequestStatistics.as_view(),
         name="request-statistics",
-    )
-    
+    ),
 ]
-

@@ -61,29 +61,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
             return profile
 
-    def update(self, instance, validated_data):
-
-        instance.fullname = validated_data["fullname"]
-        instance.religion = validated_data["religion"]
-        instance.gender = validated_data["gender"]
-        instance.phone_number = validated_data["phone_number"]
-        instance.personality = validated_data["personality"]
-        instance.date_of_birth = validated_data["date_of_birth"]
-        instance.profession = validated_data["profession"]
-        instance.bio = validated_data["bio"]
-        instance.roomate_description = validated_data[
-            "roomate_description"
-        ]
-        instance.roomie_age = validated_data["roomie_age"]
-        instance.roomie_religion = validated_data["roomie_religion"]
-        instance.roomie_gender = validated_data["roomie_gender"]
-        instance.roomie_personality = validated_data["roomie_personality"]
-
-        instance.save()
-
-        return instance
-
-
 class RequestImageSerializer(serializers.ModelSerializer):
     image_url = serializers.ReadOnlyField()
 
