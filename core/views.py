@@ -337,7 +337,7 @@ class CancelConnection(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Connection.objects.all()
 
-    def delete(self, request, pk, format=None):
+    def delete(self, request, pk):
         try:
             connection = Connection.objects.get(id=pk, sender=request.user)
             connection.delete()
@@ -347,7 +347,6 @@ class CancelConnection(DestroyAPIView):
             )
 
         except Exception as e:
-            print(e)
             return Response(
                 {"detail": "You can't cancel this connection"},
                 status=status.HTTP_400_BAD_REQUEST,
