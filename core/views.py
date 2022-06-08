@@ -1,4 +1,5 @@
 import django_filters
+from authentify.models import CustomUser
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -13,12 +14,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .enums import ConnectionStatus
-from .models import Connection, Profile, RoomateRequest
+from .models import Connection, Notification, Profile, RoomateRequest
 from .serializers import (
     ConnectionSerializer,
+    NotificationSerializer,
     ProfileSerializer,
     RoomateRequestSerializer,
 )
+from .utils import create_notification
 
 
 class CreateProfile(CreateAPIView):
@@ -262,17 +265,29 @@ class GetUserInactiveRoomateRequests(APIView):
 class CreateConnection(CreateAPIView):
 
     serializer_class = ConnectionSerializer
-    # parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated]
     queryset = Connection
 
+    def post(self, request):
 
-# class AcceptConnection(APIView):
+        serializer = self.get_serializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
-#     serializer_class = ConnectionSerializer
-#     # parser_classes = (MultiPartParser,)
-#     permission_classes = [IsAuthenticated]
-#     queryset = Connection
+        sender_fullname = serializer.data["sender_data"][0]["fullname"]
+        reciever = serializer.data["reciever"]
+        connection_id = serializer.data["id"]
+        content = f"{sender_fullname} just sent you a connection request"
+        user = CustomUser.objects.get(
+            id=reciever,
+        )
+        connection_type = "recieved"
+        connection = Connection.objects.get(id=connection_id)
+        create_notification(user, content, connection_type, connection)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class AcceptConnection(UpdateAPIView):
@@ -293,6 +308,21 @@ class AcceptConnection(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        sender = serializer.data["sender"]
+        reciever_fullname = serializer.data["roomate_request"]["profile"][
+            "fullname"
+        ]
+        connection_id = serializer.data["id"]
+        content = (
+            f"{reciever_fullname} just accepted your connection request"
+        )
+        user = CustomUser.objects.get(
+            id=sender,
+        )
+        connection_type = "accepted"
+        connection = Connection.objects.get(id=connection_id)
+        create_notification(user, content, connection_type, connection)
 
         return Response(
             {
@@ -322,6 +352,21 @@ class RejectConnection(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        sender = serializer.data["sender"]
+        reciever_fullname = serializer.data["roomate_request"]["profile"][
+            "fullname"
+        ]
+        connection_id = serializer.data["id"]
+        content = (
+            f"{reciever_fullname} just declined your connection request"
+        )
+        user = CustomUser.objects.get(
+            id=sender,
+        )
+        connection_type = "declined"
+        connection = Connection.objects.get(id=connection_id)
+        create_notification(user, content, connection_type, connection)
+
         return Response(
             {
                 "detail": "connection rejected successfully",
@@ -348,7 +393,7 @@ class CancelConnection(DestroyAPIView):
 
         except Exception as e:
             return Response(
-                {"detail": "You can't cancel this connection"},
+                {"detail": "An error occured"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -444,3 +489,17 @@ class RequestStatistics(APIView):
         }
 
         return Response(response)
+
+
+class GetAllNotification(ListAPIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    serializer_class = NotificationSerializer
+    queryset = Notification.objects.all()
+
+    def get(self, request):
+        notification = Notification.objects.filter(user=request.user)
+        serializer = self.serializer_class(notification, many=True)
+
+        return Response(serializer.data)

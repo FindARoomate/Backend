@@ -2,7 +2,13 @@ from authentify.models import CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Connection, Profile, RequestImages, RoomateRequest
+from .models import (
+    Connection,
+    Notification,
+    Profile,
+    RequestImages,
+    RoomateRequest,
+)
 
 # class ImageSerializer(serializers.ModelSerializer):
 #     image_url = serializers.ReadOnlyField()
@@ -60,6 +66,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             profile = Profile.objects.create(user=user, **validated_data)
 
             return profile
+
 
 class RequestImageSerializer(serializers.ModelSerializer):
     image_url = serializers.ReadOnlyField()
@@ -189,3 +196,19 @@ class ConnectionSerializer(serializers.ModelSerializer):
                 roomate_request=roomate_request,
             )
         return connection
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    connection = ConnectionSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = [
+            "id",
+            "connection",
+            "title",
+            "content",
+            "is_read",
+            "created_at",
+        ]

@@ -14,6 +14,7 @@ from django.utils import timezone
 from .enums import ConnectionStatus, Gender, Personality, Religion
 from .managers import SoftDeletionManager
 
+
 class BaseClass(models.Model):
     """
     Base class that contains fields other model classes will subclass from
@@ -236,3 +237,10 @@ class Connection(BaseClass, SoftDeleteBaseModel):
         choices=ConnectionStatus.choices,
         default=ConnectionStatus.PENDING,
     )
+
+class Notification(BaseClass, SoftDeleteBaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    connection = models.ForeignKey(Connection, on_delete=models.CASCADE, related_name="connections")
+    title = models.CharField(max_length=250)
+    content = models.CharField(max_length=250)
+    is_read = models.BooleanField(default=False)

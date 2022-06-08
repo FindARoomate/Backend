@@ -8,6 +8,7 @@ from .views import (
     CreateProfile,
     CreateRoomateRequest,
     DeactivateRequest,
+    GetAllNotification,
     GetOneRoomateRequest,
     GetProfile,
     GetReceivedRequests,
@@ -112,4 +113,5 @@ urlpatterns = [
         RequestStatistics.as_view(),
         name="request-statistics",
     ),
+    path("notifications/", GetAllNotification.as_view(), name="notifications")
 ]
