@@ -379,7 +379,7 @@ class RejectConnection(UpdateAPIView):
 class CancelConnection(DestroyAPIView):
 
     serializer_class = ConnectionSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     queryset = Connection.objects.all()
 
     def delete(self, request, pk):

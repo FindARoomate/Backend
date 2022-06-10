@@ -187,6 +187,8 @@ cloudinary.config(
 )
 
 POSITION_ACCESS_KEY = os.environ.get("POSITION_ACCESS_KEY")
+FRONTEND_URL = os.environ.get("FRONTEND_URL")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
