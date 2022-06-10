@@ -1,6 +1,6 @@
 import django_filters
 from authentify.models import CustomUser
-from rest_framework import status
+from rest_framework import filters, status
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
@@ -120,15 +120,15 @@ class RoomateRequestFilter(django_filters.FilterSet):
             "gender",
             "religion",
             "room_type",
-            "listing_title",
-            "is_active",
         ]
 
 
 class GetRoomateRequests(ListAPIView):
     serializer_class = RoomateRequestSerializer
-    queryset = RoomateRequest.objects.all()
+    queryset = RoomateRequest.objects.filter(is_active=True)
     filter_class = RoomateRequestFilter
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ["listing_title"]
 
 
 class GetOneRoomateRequest(RetrieveAPIView):
@@ -379,7 +379,7 @@ class RejectConnection(UpdateAPIView):
 class CancelConnection(DestroyAPIView):
 
     serializer_class = ConnectionSerializer
-    #permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Connection.objects.all()
 
     def delete(self, request, pk):
