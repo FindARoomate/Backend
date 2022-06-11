@@ -379,23 +379,25 @@ class RejectConnection(UpdateAPIView):
 class CancelConnection(DestroyAPIView):
 
     serializer_class = ConnectionSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Connection.objects.all()
 
-    # def delete(self, request, pk):
-    #     try:
-    #         connection = Connection.objects.get(id=pk, sender=request.user)
-    #         connection.delete()
-    #         return Response(
-    #             {"message": "Connection deleted successfully"},
-    #             status=status.HTTP_204_NO_CONTENT,
-    #         )
+    def delete(self, request, pk):
+        try:
+            connection = Connection.objects.filter(
+                id=pk, sender=request.user
+            )
+            connection.delete()
+            return Response(
+                {"message": "Connection deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
-    #     except Exception as e:
-    #         return Response(
-    #             {"detail": "An error occured"},
-    #             status=status.HTTP_400_BAD_REQUEST,
-            # )
+        except Exception as e:
+            return Response(
+                {"detail": "An error occured"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class GetSentRequests(APIView):
@@ -504,6 +506,7 @@ class GetAllNotification(ListAPIView):
 
         return Response(serializer.data)
 
+
 class UpdateNotification(UpdateAPIView):
 
     permission_classes = [
@@ -511,5 +514,3 @@ class UpdateNotification(UpdateAPIView):
     ]
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
-
-   
