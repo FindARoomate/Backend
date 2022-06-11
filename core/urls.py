@@ -19,6 +19,7 @@ from .views import (
     GetUserRoomateRequests,
     RejectConnection,
     RequestStatistics,
+    UpdateNotification,
     UpdateProfile,
     UpdateRoomateRequest,
 )
@@ -113,5 +114,13 @@ urlpatterns = [
         RequestStatistics.as_view(),
         name="request-statistics",
     ),
-    path("notifications/", GetAllNotification.as_view(), name="notifications")
+    path(
+        "notifications/",
+        GetAllNotification.as_view(),
+        name="notifications",
+    ),
+    path(
+        "notifications/<str:pk>/",
+        UpdateNotification.as_view(),
+    ),
 ]
