@@ -9,6 +9,7 @@ from .views import (
     CreateRoomateRequest,
     DeactivateRequest,
     GetAllNotification,
+    GetAProfile,
     GetOneRoomateRequest,
     GetProfile,
     GetReceivedRequests,
@@ -34,6 +35,11 @@ urlpatterns = [
         name="update-profile",
     ),
     path("profile/get/", GetProfile.as_view(), name="get-profile"),
+    path(
+        "profile/<str:pk>/",
+        GetAProfile.as_view(),
+        name="get-a-profile",
+    ),
     path(
         "request/create/",
         CreateRoomateRequest.as_view(),

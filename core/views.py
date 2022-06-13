@@ -74,6 +74,10 @@ class GetProfile(APIView):
 
         return Response({"email": email, "data": data})
 
+class GetAProfile(RetrieveAPIView):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
+
 
 class CreateRoomateRequest(CreateAPIView):
 
