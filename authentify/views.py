@@ -168,7 +168,7 @@ class ResendActivation(APIView):
         user_data = serializer.data
         user = self.queryset.get(email=user_data["email"])
 
-        send_activation_email(request, user)
+        send_activation_email(user)
 
         return Response(
             {"message": "An activation link has been sent to your email"},
