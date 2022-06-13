@@ -112,7 +112,7 @@ class Register(APIView):
         user_data = serializer.data
         user = self.queryset.get(email=user_data["email"])
 
-        send_activation_email(request, user)
+        send_activation_email(user)
         data = serializer.data
         return Response(
             {

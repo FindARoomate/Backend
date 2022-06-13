@@ -7,7 +7,7 @@ from django.utils.http import urlsafe_base64_encode
 from .tokens import account_activation_token
 
 
-def send_activation_email(request, value):
+def send_activation_email(value):
     mail_subject = 'Activate your account.'
     uid = urlsafe_base64_encode(force_bytes(value.pk))
     token = account_activation_token.make_token(value)
