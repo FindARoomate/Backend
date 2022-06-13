@@ -31,7 +31,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "gender",
             "phone_number",
             "personality",
-            "date_of_birth",
             "profession",
             "bio",
             "profile_picture",

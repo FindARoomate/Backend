@@ -75,7 +75,6 @@ class Profile(BaseClass):
     phone_number = models.CharField(
         max_length=23,
     )
-    date_of_birth = models.DateField()
     personality = models.CharField(
         max_length=250,
         choices=Personality.choices,
