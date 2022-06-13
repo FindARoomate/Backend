@@ -12,7 +12,7 @@ def send_activation_email(value):
     uid = urlsafe_base64_encode(force_bytes(value.pk))
     token = account_activation_token.make_token(value)
     activation_link = (
-        settings.FRONTEND_URL + "confirm-email" + uid + "/" + token
+        settings.FRONTEND_URL + "confirm-email/" + uid + "/" + token
     )
     message = "Hello {0},Kindly activate your account using this link\n {1}".format(
         value.username, activation_link
