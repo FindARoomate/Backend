@@ -7,17 +7,20 @@ class Gender(TextChoices):
     FEMALE = "FEMALE"
     OTHERS = "I_DON'T_MIND"
 
+
 class Personality(TextChoices):
 
     INTROVERT = "INTROVERT"
     EXTROVERT = "EXTROVERT"
     OTHERS = "I_DON'T_MIND"
 
+
 class Religion(TextChoices):
 
     ISLAM = "ISLAM"
     CHRISTIANITY = "CHRISTIANITY"
-    OTHERS = "I_DON'T_MIND"
+    OTHERS = "OTHERS"
+
 
 class ConnectionStatus(TextChoices):
 
