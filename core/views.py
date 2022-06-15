@@ -74,6 +74,7 @@ class GetProfile(APIView):
 
         return Response({"email": email, "data": data})
 
+
 class GetAProfile(RetrieveAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
@@ -131,7 +132,7 @@ class GetRoomateRequests(ListAPIView):
     serializer_class = RoomateRequestSerializer
     queryset = RoomateRequest.objects.filter(is_active=True)
     filter_class = RoomateRequestFilter
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
     search_fields = ["listing_title"]
 
 
