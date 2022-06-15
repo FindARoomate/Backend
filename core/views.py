@@ -132,7 +132,7 @@ class GetRoomateRequests(ListAPIView):
     serializer_class = RoomateRequestSerializer
     queryset = RoomateRequest.objects.filter(is_active=True)
     filter_class = RoomateRequestFilter
-    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
+    filter_backends = (filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend)
     search_fields = ["listing_title"]
 
 
