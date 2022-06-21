@@ -132,7 +132,10 @@ class GetRoomateRequests(ListAPIView):
     serializer_class = RoomateRequestSerializer
     queryset = RoomateRequest.objects.filter(is_active=True)
     filter_class = RoomateRequestFilter
-    filter_backends = (filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend)
+    filter_backends = (
+        filters.SearchFilter,
+        django_filters.rest_framework.DjangoFilterBackend,
+    )
     search_fields = ["listing_title"]
 
 
@@ -519,3 +522,32 @@ class UpdateNotification(UpdateAPIView):
     ]
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
+
+
+class ConnectionRequestStatistics(APIView):
+    serializer_class = ConnectionSerializer
+    queryset = Connection.objects.all()
+
+    def get(self, request, pk):
+        request = RoomateRequest.objects.get(id=pk)
+        pending = Connection.objects.filter(
+            roomate_request=request, status=ConnectionStatus.PENDING
+        )
+        accepted = Connection.objects.filter(
+            roomate_request=request, status=ConnectionStatus.ACCEPTED
+        )
+        rejected = Connection.objects.filter(
+            roomate_request=request, status=ConnectionStatus.REJECTED
+        )
+
+        pending_data = self.serializer_class(pending, many=True)
+        accepted_data = self.serializer_class(accepted, many=True)
+        rejected_data = self.serializer_class(rejected, many=True)
+
+        response = {
+            "pending_requests": pending_data.data,
+            "accepted_requests": accepted_data.data,
+            "rejected_requests": rejected_data.data,
+        }
+
+        return Response(response)

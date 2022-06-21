@@ -4,6 +4,7 @@ from .views import (
     AcceptConnection,
     ActivateRequest,
     CancelConnection,
+    ConnectionRequestStatistics,
     CreateConnection,
     CreateProfile,
     CreateRoomateRequest,
@@ -128,5 +129,9 @@ urlpatterns = [
     path(
         "notifications/<str:pk>/",
         UpdateNotification.as_view(),
+    ),
+    path(
+        "connections/<str:pk>/requests/",
+        ConnectionRequestStatistics.as_view(),
     ),
 ]
