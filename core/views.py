@@ -14,12 +14,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .enums import ConnectionStatus
-from .models import Connection, Notification, Profile, RoomateRequest
+from .models import Connection, Notification, Profile, RequestImages, RoomateRequest
 from .serializers import (
     ConnectionSerializer,
     NotificationSerializer,
     ProfileSerializer,
     RoomateRequestSerializer,
+    ImageSerializer,
 )
 from .utils import create_notification
 
@@ -48,6 +49,7 @@ class UpdateProfile(UpdateAPIView):
         IsAuthenticated,
     ]
     serializer_class = ProfileSerializer
+    parser_classes = (MultiPartParser,)
     queryset = Profile.objects.all()
 
     def patch(self, request, *args, **kwargs):
@@ -64,6 +66,21 @@ class UpdateProfile(UpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UploadImage(CreateAPIView):
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser,)
+    queryset = RequestImages.objects.all()
+    serializer_class = ImageSerializer
+
+
+class DeleteImage(DestroyAPIView):
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser,)
+    queryset = RequestImages.objects.all()
+    serializer_class = ImageSerializer
 
 
 class GetProfile(APIView):

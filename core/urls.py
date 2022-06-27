@@ -24,6 +24,8 @@ from .views import (
     UpdateNotification,
     UpdateProfile,
     UpdateRoomateRequest,
+    UploadImage,
+    DeleteImage,
 )
 
 urlpatterns = [
@@ -134,4 +136,7 @@ urlpatterns = [
         "connections/<str:pk>/requests/",
         ConnectionRequestStatistics.as_view(),
     ),
+    path("image/request/", UploadImage.as_view()),
+    path("image/request/<str:pk>/", DeleteImage.as_view())
+
 ]
