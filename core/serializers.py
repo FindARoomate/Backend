@@ -10,6 +10,7 @@ from .models import (
     RoomateRequest,
 )
 
+
 class ImageSerializer(serializers.ModelSerializer):
     image_url = serializers.ReadOnlyField()
     request_id = serializers.IntegerField()
@@ -17,14 +18,23 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequestImages
         fields = ["id", "image_url", "request_id", "image_file"]
-    
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("image_file")
+
+        return representation
+
     def create(self, validated_data):
         id = validated_data["request_id"]
         request = RoomateRequest.objects.get(id=id)
         image_file = validated_data["image_file"]
-        image = RequestImages.objects.create(request=request, image_file=image_file)
+        image = RequestImages.objects.create(
+            request=request, image_file=image_file
+        )
 
         return image
+
 
 class ProfileSerializer(serializers.ModelSerializer):
 
@@ -80,7 +90,7 @@ class RequestImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RequestImages
-        fields = ["image_url"]
+        fields = ["id", "image_url"]
 
 
 class RoomateRequestSerializer(serializers.ModelSerializer):
