@@ -12,7 +12,7 @@ class Personality(TextChoices):
 
     INTROVERT = "INTROVERT"
     EXTROVERT = "EXTROVERT"
-    OTHERS = "I_DON'T_MIND"
+    OTHERS = "OTHERS"
 
 
 class Religion(TextChoices):
